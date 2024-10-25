@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.fighter3.mapper.QuestionMapper">
+    <!-- 其他SQL语句 -->
+    <select id="selectByUserId" resultType="cn.fighter3.entity.Question">
+        SELECT * FROM questions WHERE user_id = #{userId}
+    </select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="questionId">
+        INSERT INTO questions (user_id, course_id, question_text, question_time)
+        VALUES (#{userId}, #{courseId}, #{questionText}, #{questionTime})
+    </insert>
+</mapper>

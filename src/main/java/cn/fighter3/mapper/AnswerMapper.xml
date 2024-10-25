@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.fighter3.mapper.AnswerMapper">
+
+    <!-- 定义selectByQuestionId查询 -->
+    <select id="selectByQuestionId" resultType="cn.fighter3.entity.Answer">
+        SELECT * FROM answers
+        WHERE question_id = #{questionId}
+    </select>
+
+</mapper>
