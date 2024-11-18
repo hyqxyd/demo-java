@@ -4,16 +4,22 @@ import cn.fighter3.config.AppConfig;
 
 
 import cn.fighter3.entity.Question;
+import cn.fighter3.entity.Session;
 import cn.fighter3.mapper.QuestionMapper;
+import cn.fighter3.mapper.SessionMapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import okhttp3.*;
 
 import okio.BufferedSource;
+import org.hibernate.sql.Update;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.Date;
+
 
 
 @Service
@@ -28,8 +34,13 @@ public class WenxinYiyanService {
     private QuestionService questionService ;
     @Autowired
     private AnswerService answerService;
+    @Autowired
+    private SessionService sessionService;
+    @Autowired
+    private SessionMapper sessionMapper;
 
     private int modeId = 1;
+    private  int flag=0;
 
     private OkHttpClient client = new OkHttpClient();
 
@@ -62,11 +73,15 @@ public String getAccessToken() throws IOException {
     public String sendStreamRequest(String prompt) throws Exception {
         String accessToken = getAccessToken();
         MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
+        //查询历史记录
 
 
         JSONObject jsonObj = new JSONObject(prompt);
         String content = jsonObj.getString("content");
         int user_id=jsonObj.getInt("id");
+        String s_id=jsonObj.getString("sessionId");
+
+
        //插入+保存问题
         int q_id= questionService.saveQuestion(user_id, 1,content );
         //获取插入问题的id
@@ -79,7 +94,29 @@ public String getAccessToken() throws IOException {
             prompt = prompt.substring(0, prompt.length() - 1);
         }
        // RequestBody ebRequestBody = RequestBody.create(mediaType,jsonObject.toString());
-        String json= "{\"messages\":[{\"role\":\"user\",\"content\":\"" + prompt + "\"}],\"stream\":true}";
+        String message="{\"role\":\"user\",\"content\":\"" + prompt +"\"}";
+
+
+        Session session=sessionMapper.selectOne(new QueryWrapper<Session>().eq("id", s_id).eq("user_id", user_id));
+        String messages="";
+        if(session==null){
+            System.out.println("新对话");
+
+            flag=1;//第一次提问
+            messages+=message;
+        }else {
+            System.out.println("历史对话");
+            messages=session.getContent();
+            if(messages.endsWith("\n")){
+                messages=messages.substring(0,messages.length()-1);
+            }
+            messages=messages+","+message;
+        }
+
+
+
+        String json= "{\"messages\":["+messages+"],\"stream\":true}";
+        System.out.println(json);
         RequestBody ebRequestBody = RequestBody.create(mediaType, json);
         System.out.println(ebRequestBody);
         Request request = new Request.Builder()
@@ -113,8 +150,21 @@ public String getAccessToken() throws IOException {
                 System.out.println(answer);
                 //JSONObject r = new JSONObject(response.body().string());//获取回答
                 //String answer = r.getString("result");
-                answerService.saveAnswer(q_id, answer,modeId);
+                int a_id=answerService.saveAnswer(q_id, answer,modeId);
+                messages+=","+"{\"role\":\"assistant\",\"content\":\"" + answer +"\"}";
+                if(flag==1) {
+                    sessionService.saveSession(s_id, q_id, a_id, modeId, 1, user_id,messages);
+                }else {
+                    UpdateWrapper<Session> updateWrapper = new UpdateWrapper<>();
+                    updateWrapper.eq("id", s_id).eq("user_id", user_id);
 
+                    Session newsession = session;
+                    newsession.setContent(messages);
+                    newsession.setSessionTime();
+
+                    sessionMapper.update(newsession, updateWrapper);
+
+                }
                 //System.out.println(response.body().string().toString());
                 return answer;
             } else {

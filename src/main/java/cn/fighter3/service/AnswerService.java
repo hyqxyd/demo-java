@@ -14,13 +14,13 @@ public class AnswerService extends ServiceImpl<AnswerMapper, Answer> {
     @Autowired
     private AnswerMapper answerMapper;
     @Transactional
-    public void saveAnswer(int questionId, String answerText, int modelId ){
+    public int saveAnswer(int questionId, String answerText, int modelId ){
         Answer answer = new Answer();
         answer.setQuestionId(questionId);
         answer.setAnswerText(answerText);
         answer.setModelId(modelId);
         answer.setAnswerTime(new Date());
         answerMapper.insert(answer);
-
+        return answer.getAnswerId();
     };
 }

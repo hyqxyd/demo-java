@@ -7,4 +7,7 @@ import java.util.List;
 
 public interface QuestionMapper extends BaseMapper<Question> {
     List<Question> selectByUserId(int userId);
+
+
+
 }

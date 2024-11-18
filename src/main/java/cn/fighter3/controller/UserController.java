@@ -6,12 +6,14 @@ import cn.fighter3.result.Result;
 import cn.fighter3.service.ExcelService;
 import cn.fighter3.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.core.io.UrlResource;
+import org.springframework.core.io.Resource;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -93,4 +95,8 @@ public class UserController {
             return new Result(500, "导入失败", null);
         }
     }
+
+
+
+
 }

@@ -1,5 +1,7 @@
 package cn.fighter3.service;
 
+import cn.fighter3.entity.Session;
+import cn.fighter3.mapper.SessionMapper;
 import com.alibaba.dashscope.aigc.generation.Generation;
 import com.alibaba.dashscope.aigc.generation.GenerationParam;
 import com.alibaba.dashscope.aigc.generation.GenerationResult;
@@ -9,6 +11,8 @@ import com.alibaba.dashscope.exception.ApiException;
 import com.alibaba.dashscope.exception.InputRequiredException;
 import com.alibaba.dashscope.exception.NoApiKeyException;
 import com.alibaba.dashscope.utils.JsonUtils;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import okhttp3.*;
 import okio.BufferedSource;
 import org.json.JSONArray;
@@ -25,7 +29,12 @@ public class TongyiQianwenService {
     @Autowired
     private AnswerService answerService;
 
+    @Autowired
+    private SessionService sessionService;
+    @Autowired
+    private SessionMapper sessionMapper;
     private int modeId = 2;
+    private  int flag=0;
     @Autowired
     private OkHttpClient okHttpClient;
 
@@ -33,16 +42,41 @@ public class TongyiQianwenService {
         JSONObject jsonObj = new JSONObject(prompt);
         String content = jsonObj.getString("content");
         int user_id = jsonObj.getInt("id");
+        String s_id=jsonObj.getString("sessionId");
         //插入+保存问题
         int q_id= questionService.saveQuestion(user_id, 1,content );
         //获取插入问题的id
         System.out.println("问题插入成功");
         System.out.println(content);
 
+
+
+        // 调用API
         prompt = content;
         if (prompt.endsWith("\n")) {
             prompt = prompt.substring(0, prompt.length() - 1);
         }
+        String message="{\"role\":\"user\",\"content\":\"" + prompt +"\"}";
+        Session session=sessionMapper.selectOne(new QueryWrapper<Session>().eq("id", s_id).eq("user_id", user_id));
+        String messages="";
+        if(session==null){
+            System.out.println("新对话");
+
+            flag=1;//第一次提问
+            System.out.println(flag);
+            messages+=message;
+        }else {
+            System.out.println("历史对话");
+            messages=session.getContent();
+            if(messages.endsWith("\n")){
+                messages=messages.substring(0,messages.length()-1);
+            }
+            messages=messages+","+message;
+        }
+
+
+
+
         OkHttpClient client = new OkHttpClient();
         // 替换为你的API URL
         String url = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions";
@@ -59,10 +93,7 @@ public class TongyiQianwenService {
                 + "        \"role\": \"system\","
                 + "        \"content\": \"You are a helpful assistant.\""
                 + "    },"
-                + "    {"
-                + "        \"role\": \"user\", "
-                + "        \"content\": \""+prompt+"\""
-                + "    }"
+                +messages
                 + "],"
                 + "\"stream\": true"
                 + "}";
@@ -111,8 +142,25 @@ public class TongyiQianwenService {
                     data += c;
                 }
                 System.out.println(data);
-                answerService.saveAnswer(q_id, data,modeId);
+                int a_id=answerService.saveAnswer(q_id, data,modeId);
                 System.out.println("答案保存成功！");
+                messages+=","+"{\"role\":\"assistant\",\"content\":\"" + data +"\"}";
+                System.out.println(flag);
+                if(flag==1) {
+                    sessionService.saveSession(s_id, q_id, a_id, modeId, 1, user_id,messages);
+                }else {
+                    UpdateWrapper<Session> updateWrapper = new UpdateWrapper<>();
+                    updateWrapper.eq("id", s_id).eq("user_id", user_id);
+
+                    Session newsession = session;
+                    newsession.setContent(messages);
+                    newsession.setSessionTime();
+
+                    sessionMapper.update(newsession, updateWrapper);
+
+                }
+
+
             }
 
 
