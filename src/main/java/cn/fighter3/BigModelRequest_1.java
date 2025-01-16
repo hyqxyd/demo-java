@@ -1,16 +1,14 @@
-package cn.fighter3.service;
+package cn.fighter3;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.SneakyThrows;
 import okhttp3.*;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.swing.*;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
@@ -19,7 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-public class BigModelRequest extends WebSocketListener {
+public class BigModelRequest_1 extends WebSocketListener {
     private final String hostUrl = "https://spark-api.xf-yun.com/v3.5/chat";
     private final String apiKey = "4f103c4e097b970e48b2063dd7fd4234";
     private final String apiSecret = "NjUzOTNiOWM1NTU4NDlmYzkwMzg4YzAy";
@@ -28,21 +26,19 @@ public class BigModelRequest extends WebSocketListener {
     private OkHttpClient client;
     private JSONArray text;
     private String data = "";
-    private SseEmitter sseEmitter;
     private CompletableFuture<String> future;
     public CompletableFuture<String> getDataFuture() {
         return future;
     }
 
-    public void setText(JSONArray text ) {
+    public void setText(JSONArray text) {
         this.text = text;
     }
     public String getData() {
         return this.data;
     }
-    public BigModelRequest(JSONArray text,SseEmitter sseEmitter) throws Exception {
+    public BigModelRequest_1(JSONArray text) throws Exception {
         this.text=text;
-        this.sseEmitter=sseEmitter;
         client = new OkHttpClient();
         future = new CompletableFuture<>();
         try{
@@ -103,7 +99,6 @@ public class BigModelRequest extends WebSocketListener {
     @Override
     public void onMessage(WebSocket webSocket, String text) {
         super.onMessage(webSocket, text);
-        boolean isend=false;
         System.out.println("收到服务器消息：" + text);
 
         System.out.println("接收到的消息: " + text);
@@ -121,22 +116,12 @@ public class BigModelRequest extends WebSocketListener {
         System.out.println(deltaObject.toString());
         content = deltaObject.getString("content");
         System.out.println("Content: " + content);
+
         this.data += content;
         if(choicesObject.getInt("status") == 2) {
-            isend=true;
             future.complete(data);
             Thread.sleep(200);
         }
-        final String finalContent = content;
-        final boolean finalIsend = isend;
-       new Thread(() -> {
-           try {
-               sseEmitter.send(SseEmitter.event().data("{\"content\":\"" + finalContent + "\",\"is_end\":\"" + finalIsend + "\"}"));
-           } catch (IOException e) {
-               throw new RuntimeException(e);
-           }
-       }).start();
-
 
     }
 

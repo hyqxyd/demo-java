@@ -2,7 +2,10 @@ package cn.fighter3.service.impl;
 
 import cn.fighter3.dto.QueryDTO;
 import cn.fighter3.entity.Course;
+import cn.fighter3.entity.Course_student;
+import cn.fighter3.entity.Topic;
 import cn.fighter3.mapper.CourseMapper;
+import cn.fighter3.mapper.TopicMapper;
 import cn.fighter3.service.CourseService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -15,6 +18,10 @@ import java.util.List;
 public class CourseServiceImpl implements CourseService {
     @Autowired
     private CourseMapper courseMapper;
+
+
+    @Autowired
+    private TopicMapper topicMapper;
 
     @Override
     public IPage<Course> selectCoursePage(QueryDTO queryDTO) {
@@ -43,4 +50,14 @@ public class CourseServiceImpl implements CourseService {
     public void batchDeleteCourse(List<Integer> ids) {
         courseMapper.deleteBatchIds(ids);
     }
+    @Override
+    public List<Course> getCoursesByStudentId(Integer studentId) {
+
+
+      return courseMapper.selectCoursesByStudentId(studentId);
+    }
+    public List<Topic> getTopicsByCourseId(Integer courseId) {
+        return topicMapper.selectTopicsByCourseId(courseId);
+    }
+
 }

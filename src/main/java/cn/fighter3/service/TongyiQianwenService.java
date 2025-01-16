@@ -19,9 +19,13 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 @Service
 public class TongyiQianwenService {
     @Autowired
@@ -38,7 +42,7 @@ public class TongyiQianwenService {
     @Autowired
     private OkHttpClient okHttpClient;
 
-    public  String callWithMessage(String prompt ) throws ApiException, NoApiKeyException, InputRequiredException {
+    public  void callWithMessage(String prompt , SseEmitter sseEmitter) throws ApiException, NoApiKeyException, InputRequiredException {
         JSONObject jsonObj = new JSONObject(prompt);
         String content = jsonObj.getString("content");
         int user_id = jsonObj.getInt("id");
@@ -74,6 +78,7 @@ public class TongyiQianwenService {
             messages=messages+","+message;
         }
 
+        System.out.println("上下文："+messages);
 
 
 
@@ -93,12 +98,12 @@ public class TongyiQianwenService {
                 + "        \"role\": \"system\","
                 + "        \"content\": \"You are a helpful assistant.\""
                 + "    },"
-                +messages
+               +messages
                 + "],"
                 + "\"stream\": true"
                 + "}";
         RequestBody body = RequestBody.create(json, JSON);
-
+        System.out.println(body.toString());
         // 创建请求对象
         Request request = new Request.Builder()
                 .url(url)
@@ -108,70 +113,89 @@ public class TongyiQianwenService {
                 .build();
 
         System.out.println(request.toString());
+        final  String messages_c=messages;
 
-        String data = null;
-        try(Response response=client.newCall(request).execute()){
-            if (!response.isSuccessful()) {
-                System.err.println("请求失败: " + response.code());
-                throw new RuntimeException("请求失败: " + response);
-            }
-            data = "";
-            // 处理流式响应
-            ResponseBody responseBody = response.body();
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        executorService.execute(() -> {
 
-            if (responseBody != null) {
-                BufferedSource source = responseBody.source();
 
-                while (!source.exhausted()) {
-                    String line = source.readUtf8LineStrict();
-                    System.out.println(line);
-                    if (line.trim().isEmpty() || line.contains("[DONE]")) {
-                        continue; // 跳过空行
+            try (Response response = client.newCall(request).execute()) {
+                if (response.isSuccessful()) {
+                    String data = "";
+                    // 处理流式响应
+                    ResponseBody responseBody = response.body();
+                    if (responseBody != null) {
+                        BufferedSource source = responseBody.source();
+                        boolean isend = false;
+                        while (!source.exhausted()) {
+                            String line = source.readUtf8LineStrict();
+                            System.out.println(line);
+                            if (line.trim().isEmpty() || line.contains("[DONE]")) {
+                                continue; // 跳过空行
+                            }
+                            // 解析JSON格式的行
+                            JSONObject jsonObject = new JSONObject("{" + line + "}");
+                            String c = jsonObject.getJSONObject("data").toString();
+                            jsonObject = new JSONObject(c);
+                            System.out.println(jsonObject.toString());
+                            JSONObject choicesObject = jsonObject.getJSONArray("choices").getJSONObject(0);
+                            System.out.println(choicesObject.toString());
+                            String finishreason = choicesObject.optString("finish_reason", null);
+
+                            System.out.println(finishreason);
+                            JSONObject deltaObject = choicesObject.getJSONObject("delta");
+                            if ( finishreason!= null) {
+                                System.out.println("结束！");
+                                isend = true;
+                            }
+                            System.out.println(isend);
+                            System.out.println(deltaObject.toString());
+
+                            c = deltaObject.getString("content");
+
+                            System.out.println("Content: " + c);
+//
+                            sseEmitter.send(SseEmitter.event().data("{\"content\":\"" + c + "\",\"is_end\":\"" + isend + "\"}"));
+
+                            data += c;
+
+                        }
+                        sseEmitter.complete();
                     }
-                    // 解析JSON格式的行
-                    JSONObject jsonObject = new JSONObject("{" + line + "}");
-                    String c = jsonObject.getJSONObject("data").toString();
-                    jsonObject = new JSONObject(c);
-                    System.out.println(jsonObject.toString());
-                    JSONObject choicesObject = jsonObject.getJSONArray("choices").getJSONObject(0);
-                    System.out.println(choicesObject.toString());
-                    JSONObject deltaObject = choicesObject.getJSONObject("delta");
-                    System.out.println(deltaObject.toString());
-                    c = deltaObject.getString("content");
-                    System.out.println("Content: " + c);
-                    data += c;
-                }
-                System.out.println(data);
-                int a_id=answerService.saveAnswer(q_id, data,modeId);
-                System.out.println("答案保存成功！");
-                messages+=","+"{\"role\":\"assistant\",\"content\":\"" + data +"\"}";
-                System.out.println(flag);
-                if(flag==1) {
-                    sessionService.saveSession(s_id, q_id, a_id, modeId, 1, user_id,messages);
+
+
+                        System.out.println(data);
+                        int a_id = answerService.saveAnswer(q_id, data, modeId);
+                        System.out.println("答案保存成功！");
+                        String history = messages_c + "," + "{\"role\":\"system\",\"content\":\"" + data + "\"}";
+                        System.out.println(flag);
+                        if (flag == 1) {
+                            sessionService.saveSession(s_id, q_id, a_id, modeId, 1, user_id, history);
+                        } else {
+                            UpdateWrapper<Session> updateWrapper = new UpdateWrapper<>();
+                            updateWrapper.eq("id", s_id).eq("user_id", user_id);
+
+                            Session newsession = session;
+                            newsession.setContent(history);
+                            newsession.setSessionTime();
+
+                            sessionMapper.update(newsession, updateWrapper);
+
+                        }
+
                 }else {
-                    UpdateWrapper<Session> updateWrapper = new UpdateWrapper<>();
-                    updateWrapper.eq("id", s_id).eq("user_id", user_id);
-
-                    Session newsession = session;
-                    newsession.setContent(messages);
-                    newsession.setSessionTime();
-
-                    sessionMapper.update(newsession, updateWrapper);
-
+                    System.out.println(response);
+                    System.out.println("2");
+                    sseEmitter.completeWithError(new RuntimeException("请求失败: " + response));
+                    throw new RuntimeException("请求失败: " + response);
                 }
-
-
+            } catch (ApiException | IOException e) {
+                // 使用日志框架记录异常信息
+                sseEmitter.completeWithError(e);
+                System.err.println("调用生成服务时发生错误: " + e.getMessage());
             }
 
-
-        } catch (ApiException | IOException e) {
-            // 使用日志框架记录异常信息
-            System.err.println("调用生成服务时发生错误: " + e.getMessage());
-        }
-
-
-        return data;
-
+        });
 
     }
 

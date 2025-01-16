@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Service
 public class KedaXunfeiService {
@@ -27,9 +28,9 @@ public class KedaXunfeiService {
     private  int flag=0;
     private int modeId = 3;
 
-    public String sendStreamRequest(String prompt) throws Exception {
+    public void sendStreamRequest(String prompt ,SseEmitter sseEmitter) throws Exception {
         JSONObject jsonObj = new JSONObject(prompt);
-         prompt = jsonObj.getString("content");
+        prompt = jsonObj.getString("content");
         int user_id=jsonObj.getInt("id");
         String s_id=jsonObj.getString("sessionId");
         //插入+保存问题
@@ -45,7 +46,7 @@ public class KedaXunfeiService {
         }
         String message="{\"role\":\"user\",\"content\":\"" + prompt +"\"}";
         Session session=sessionMapper.selectOne(new QueryWrapper<Session>().eq("id", s_id).eq("user_id", user_id));
-         messages="";
+        messages="";
         if(session==null){
             System.out.println("新对话");
 
@@ -69,7 +70,7 @@ public class KedaXunfeiService {
 
         System.out.println(messages);
         String[] ms = {
-              messages
+                messages
         };
 
         JSONArray textArray = new JSONArray();
@@ -78,11 +79,11 @@ public class KedaXunfeiService {
         }
         System.out.println(textArray.toJSONString());
 
-        bigModelRequest=new BigModelRequest(textArray);
+        bigModelRequest=new BigModelRequest(textArray,sseEmitter);
         try {
-           data=bigModelRequest.getDataFuture().get(); // 等待异步操作完成
+            data=bigModelRequest.getDataFuture().get(); // 等待异步操作完成
         } catch (Exception e) {
-            return "获取消息失败: " + e.getMessage();
+            sseEmitter.completeWithError(e);
         }
 //        data=bigModelRequest.getData();
         System.out.println("获得的回答："+data);
@@ -173,8 +174,6 @@ public class KedaXunfeiService {
 //            e.printStackTrace();
 //        }
 
-
-        return data;
     }
 
 
