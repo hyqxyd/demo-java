@@ -151,6 +151,7 @@ public String getAccessToken() throws IOException {
                         JSONObject jsonLine = new JSONObject("{" + line + "}");
                         boolean isend = jsonLine.getJSONObject("data").getBoolean("is_end");
                         String data = jsonLine.getJSONObject("data").getString("result");
+                        data=data.replace("\n","\\n");
                         System.out.println(data);
 
 
