@@ -15,13 +15,13 @@ public class File_analysis {
 
     static final OkHttpClient HTTP_CLIENT = new OkHttpClient().newBuilder().build();
 
-    public static String Flie_upload() throws IOException {
+    public static String Flie_upload(String filename) throws IOException {
         MediaType mediaType = MediaType.parse("multipart/form-data");
         RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
                 .addFormDataPart("app_id", "dc6d8359-b428-4afa-9387-cd0cdea8c9bf")
-                .addFormDataPart("file", "1733814130026_Domenic Cotroneo.pdf",
+                .addFormDataPart("file", filename,
                         RequestBody.create(MediaType.parse("application/octet-stream"),
-                                new File("src\\main\\resources\\upload\\wenxin\\1733814130026_Domenic Cotroneo.pdf")))
+                                new File("src\\main\\resources\\upload\\wenxin\\"+filename)))
                 .build();
         Request request = new Request.Builder()
                 .url("https://qianfan.baidubce.com/v2/app/conversation/file/upload")
@@ -37,8 +37,9 @@ public class File_analysis {
     }
     static final OkHttpClient HTTP_CLIENT_2 = new OkHttpClient().newBuilder().build();
 
-    public static void main(String []args) throws IOException{
-        String jsonString  =Flie_upload();
+    public  void FileAnalysis(String  filename) throws IOException{
+
+        String jsonString  =Flie_upload(filename);
         // 解析JSON字符串为JSONObject对象
         JSONObject obj = new JSONObject(jsonString);
 
@@ -85,7 +86,7 @@ public class File_analysis {
                         break;
                     }
                     c=jsonObject.getString("answer");
-
+                    c=c.replace("\n","\\n");
                     data += c;
                 }
                 System.out.println(data);
