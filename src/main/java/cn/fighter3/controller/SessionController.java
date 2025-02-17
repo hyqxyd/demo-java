@@ -37,6 +37,16 @@ public class SessionController {
               return new Result(200, "Success", sessionList);
 
     }
+    @PostMapping("/deleteHistory")
+    //删除历史对话
+    public Result deleteHistoryDialogue(@RequestBody String prompt) {
+        System.out.println(prompt);
+        JSONObject jsonObj =JSON.parseObject(prompt);
+        String id=jsonObj.getString("id");
+        sessionService.deleteSession(id);
+        return new Result(200, "Success", null);
+    }
+
 
     @PostMapping("/loadHistory")//加载历史对话
     public Result loadHistoryDialogue(@RequestBody String prompt) {

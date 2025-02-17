@@ -5,11 +5,14 @@ import cn.fighter3.service.BigModelRequest;
 import cn.fighter3.entity.Session;
 import cn.fighter3.mapper.SessionMapper;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
 
 @Service
 public class KedaXunfeiService {
@@ -27,9 +30,9 @@ public class KedaXunfeiService {
     private  int flag=0;
     private int modeId = 3;
 
-    public String sendStreamRequest(String prompt) throws Exception {
+    public void sendStreamRequest(String prompt ,SseEmitter sseEmitter) throws Exception {
         JSONObject jsonObj = new JSONObject(prompt);
-         prompt = jsonObj.getString("content");
+        prompt = jsonObj.getString("content");
         int user_id=jsonObj.getInt("id");
         String s_id=jsonObj.getString("sessionId");
         //插入+保存问题
@@ -45,7 +48,7 @@ public class KedaXunfeiService {
         }
         String message="{\"role\":\"user\",\"content\":\"" + prompt +"\"}";
         Session session=sessionMapper.selectOne(new QueryWrapper<Session>().eq("id", s_id).eq("user_id", user_id));
-         messages="";
+        messages="";
         if(session==null){
             System.out.println("新对话");
 
@@ -68,41 +71,31 @@ public class KedaXunfeiService {
 //        RequestBody body = RequestBody.create(JSON, jsonBody);
 
         System.out.println(messages);
-        String[] ms = {
-              messages
-        };
 
-        JSONArray textArray = new JSONArray();
-        for (String m : ms) {
-            textArray.add(com.alibaba.fastjson.JSONObject.parseObject(m));
-        }
-        System.out.println(textArray.toJSONString());
+        JSONArray textArray = JSON.parseArray("["+messages+"]");
 
-        bigModelRequest=new BigModelRequest(textArray);
-        try {
-           data=bigModelRequest.getDataFuture().get(); // 等待异步操作完成
-        } catch (Exception e) {
-            return "获取消息失败: " + e.getMessage();
-        }
-//        data=bigModelRequest.getData();
-        System.out.println("获得的回答："+data);
-        int a_id=answerService.saveAnswer(q_id, data,modeId);
-        System.out.println("答案保存成功！");
-        messages+=","+"{\"role\":\"assistant\",\"content\":\"" + data +"\"}";
-        System.out.println(flag);
-        if(flag==1) {
-            sessionService.saveSession(s_id, q_id, a_id, modeId, 1, user_id,messages);
-        }else {
-            UpdateWrapper<Session> updateWrapper = new UpdateWrapper<>();
-            updateWrapper.eq("id", s_id).eq("user_id", user_id);
 
-            Session newsession = session;
-            newsession.setContent(messages);
-            newsession.setSessionTime();
+        bigModelRequest=new BigModelRequest(answerService,sessionService,sessionMapper,textArray,sseEmitter,s_id,modeId,user_id,q_id,messages,session,flag);
 
-            sessionMapper.update(newsession, updateWrapper);
-
-        }
+////        data=bigModelRequest.getData();
+//        System.out.println("获得的回答："+data);
+//        int a_id=answerService.saveAnswer(q_id, data,modeId);
+//        System.out.println("答案保存成功！");
+//        messages+=","+"{\"role\":\"assistant\",\"content\":\"" + data +"\"}";
+//        System.out.println(flag);
+//        if(flag==1) {
+//            sessionService.saveSession(s_id, q_id, a_id, modeId, 1, user_id,messages);
+//        }else {
+//            UpdateWrapper<Session> updateWrapper = new UpdateWrapper<>();
+//            updateWrapper.eq("id", s_id).eq("user_id", user_id);
+//
+//            Session newsession = session;
+//            newsession.setContent(messages);
+//            newsession.setSessionTime();
+//
+//            sessionMapper.update(newsession, updateWrapper);
+//
+//        }
 
 //       while (true){
 //            if(messageCallback.getMessage()=="回答结束"){
@@ -173,8 +166,6 @@ public class KedaXunfeiService {
 //            e.printStackTrace();
 //        }
 
-
-        return data;
     }
 
 

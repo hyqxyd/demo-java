@@ -12,4 +12,5 @@ public interface SessionMapper extends BaseMapper<Session> {
 
     List<Session> selectByUserId(@Param("userId") int userId);
     String selectNameByTId(@Param("tId") int tId);
+
 }

@@ -11,4 +11,8 @@
             </if>
         </where>
     </select>
+    <select id="selectCourseStudentById" resultType="Course_student">
+        select * from courses_student
+        WHERE student_id = #{studentId}
+    </select>
 </mapper>

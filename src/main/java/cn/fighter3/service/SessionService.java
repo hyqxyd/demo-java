@@ -45,6 +45,8 @@ public class SessionService {
         return  historySessionDTOS;
     }
     //加载历史对话
-
+    //删除对话
+    public void deleteSession(String id) {sessionMapper.deleteById(id);
+    }
 
 }

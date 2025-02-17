@@ -2,6 +2,7 @@ package cn.fighter3.controller;
 
 import cn.fighter3.dto.QueryDTO;
 import cn.fighter3.entity.Course;
+import cn.fighter3.entity.Topic;
 import cn.fighter3.result.Result;
 import cn.fighter3.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,4 +46,20 @@ public class CourseController {
         courseService.batchDeleteCourse(ids);
         return new Result(200,"","");
     }
+    @GetMapping("/coursesByStudent")
+    public Result getCoursesByStudentId(@RequestParam("studentId") Integer studentId) {
+
+        System.out.println("学生id："+studentId);
+        System.out.println("课程："+courseService.getCoursesByStudentId(studentId));
+        return new Result(200,"",courseService.getCoursesByStudentId(studentId));
+    }
+
+    @GetMapping("/topics")
+    public Result getTopicsByCourseId(@RequestParam("courseId")  Integer courseId) {
+        System.out.println(courseId);
+        System.out.println(courseService.getTopicsByCourseId(courseId));
+        return new Result(200,"",courseService.getTopicsByCourseId(courseId));
+    }
+
+
 }

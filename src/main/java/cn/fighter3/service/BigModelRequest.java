@@ -1,14 +1,22 @@
 package cn.fighter3.service;
 
+import cn.fighter3.entity.Session;
+import cn.fighter3.mapper.SessionMapper;
+import cn.fighter3.service.SessionService;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import lombok.SneakyThrows;
 import okhttp3.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.swing.*;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
@@ -26,21 +34,39 @@ public class BigModelRequest extends WebSocketListener {
     private OkHttpClient client;
     private JSONArray text;
     private String data = "";
-    private CompletableFuture<String> future;
-    public CompletableFuture<String> getDataFuture() {
-        return future;
-    }
+    private SseEmitter sseEmitter;
 
-    public void setText(JSONArray text) {
+    private AnswerService answerService;
+    private String s_id;
+    private int modeId;
+    private int user_id;
+    private int q_id;
+    private String messages;
+    private  SessionService sessionService;
+    private SessionMapper sessionMapper;
+    private Session session;
+    private int flag;//是否为历史对话
+    public void setText(JSONArray text ) {
         this.text = text;
     }
     public String getData() {
         return this.data;
     }
-    public BigModelRequest(JSONArray text) throws Exception {
+    public BigModelRequest(AnswerService answerservice,SessionService sessionService,SessionMapper sessionMapper,JSONArray text,SseEmitter sseEmitter,String s_id,int modeId ,int user_id,int q_id,String messages,Session session,int flag) throws Exception {
         this.text=text;
+        this.sseEmitter=sseEmitter;
+        this.s_id=s_id;
+        this.modeId=modeId;
+        this.user_id=user_id;
+        this.q_id=q_id;
+        this.messages=messages;
+        this.session=session;
+        this.flag=flag;
+        this.answerService=answerservice;
+        this.sessionService=sessionService;
+        this.sessionMapper=sessionMapper;
         client = new OkHttpClient();
-        future = new CompletableFuture<>();
+
         try{
             // 构建鉴权URL
             String authUrl = getAuthUrl(hostUrl, apiKey, apiSecret);
@@ -50,7 +76,7 @@ public class BigModelRequest extends WebSocketListener {
             // 创建WebSocket连接
             webSocket = client.newWebSocket(request, this);}catch (Exception e){
             e.printStackTrace();
-            future.completeExceptionally(e);
+
         }
     }
 
@@ -99,6 +125,7 @@ public class BigModelRequest extends WebSocketListener {
     @Override
     public void onMessage(WebSocket webSocket, String text) {
         super.onMessage(webSocket, text);
+        boolean isend=false;
         System.out.println("收到服务器消息：" + text);
 
         System.out.println("接收到的消息: " + text);
@@ -115,13 +142,40 @@ public class BigModelRequest extends WebSocketListener {
         org.json.JSONObject deltaObject = choicesObject.getJSONArray("text").getJSONObject(0);
         System.out.println(deltaObject.toString());
         content = deltaObject.getString("content");
+        content=content.replace("\n","\\n");
         System.out.println("Content: " + content);
-
         this.data += content;
         if(choicesObject.getInt("status") == 2) {
-            future.complete(data);
-            Thread.sleep(200);
+            isend=true;
+            System.out.println("获取到的回答："+data);
+            int a_id=answerService.saveAnswer(q_id,data,modeId);
+            System.out.println("答案保存成功！");
+            messages+=","+"{\"role\":\"assistant\",\"content\":\"" + data +"\"}";
+            if(flag==1) {
+                sessionService.saveSession(s_id, q_id, a_id, modeId, 1, user_id,messages);
+            }else {
+                UpdateWrapper<Session> updateWrapper = new UpdateWrapper<>();
+                updateWrapper.eq("id", s_id).eq("user_id", user_id);
+
+                Session newsession = session;
+                newsession.setContent(messages);
+                newsession.setSessionTime();
+
+                sessionMapper.update(newsession, updateWrapper);
+
+            }
+
         }
+        final String finalContent = content;
+        final boolean finalIsend = isend;
+        new Thread(() -> {
+            try {
+                sseEmitter.send(SseEmitter.event().data("{\"content\":\"" + finalContent + "\",\"is_end\":\"" + finalIsend + "\"}"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
+
 
     }
 
@@ -135,7 +189,7 @@ public class BigModelRequest extends WebSocketListener {
     public void onFailure(WebSocket webSocket, Throwable t, okhttp3.Response response) {
         super.onFailure(webSocket, t, response);
         System.out.println("WebSocket连接失败：" + t.getMessage());
-        future.completeExceptionally(t);
+
     }
 
     // 鉴权方法
