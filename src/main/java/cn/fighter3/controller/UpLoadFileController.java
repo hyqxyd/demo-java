@@ -35,6 +35,11 @@ public class UpLoadFileController {
         return uploadFile(file, "wenxin");
     }
 
+    // 文心一言上传接口
+    @PostMapping("/api/kimiupload")
+    public Result kimiUpload(@RequestParam("file") MultipartFile file) {
+        return uploadFile(file, "kimi");
+    }
     private Result uploadFile(MultipartFile file, String service) {
         // 获取项目的绝对路径
         String basePath = System.getProperty("user.dir") + "/src/main/resources/upload/" + service + "/";

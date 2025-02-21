@@ -85,10 +85,11 @@ public String getAccessToken() throws IOException {
         String content = jsonObj.getString("content");
         int user_id = jsonObj.getInt("id");
         String s_id = jsonObj.getString("sessionId");
-
+        int c_id=jsonObj.getInt("courseId");
+        int t_id=jsonObj.getInt("topicId");
 
         //插入+保存问题
-        int q_id = questionService.saveQuestion(user_id, 1, content);
+        int q_id = questionService.saveQuestion(user_id, c_id, content);
         //获取插入问题的id
         System.out.println("问题插入成功");
 
@@ -169,7 +170,7 @@ public String getAccessToken() throws IOException {
                 int a_id = answerService.saveAnswer(q_id, answer, modeId);
                 String history =messages_c+ "," + "{\"role\":\"assistant\",\"content\":\"" + answer + "\"}";
                 if (flag == 1) {
-                    sessionService.saveSession(s_id, q_id, a_id, modeId, 1, user_id, history);
+                    sessionService.saveSession(s_id, q_id, a_id, modeId, t_id, user_id, history);
                 } else {
                     UpdateWrapper<Session> updateWrapper = new UpdateWrapper<>();
                     updateWrapper.eq("id", s_id).eq("user_id", user_id);

@@ -37,7 +37,7 @@ public class File_analysis {
     }
     static final OkHttpClient HTTP_CLIENT_2 = new OkHttpClient().newBuilder().build();
 
-    public  void FileAnalysis(String  filename) throws IOException{
+    public  void FileAnalysis(String  filename,String query) throws IOException{
 
         String jsonString  =Flie_upload(filename);
         // 解析JSON字符串为JSONObject对象

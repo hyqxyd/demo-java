@@ -41,6 +41,7 @@ public class BigModelRequest extends WebSocketListener {
     private int modeId;
     private int user_id;
     private int q_id;
+    private int t_id;
     private String messages;
     private  SessionService sessionService;
     private SessionMapper sessionMapper;
@@ -52,7 +53,7 @@ public class BigModelRequest extends WebSocketListener {
     public String getData() {
         return this.data;
     }
-    public BigModelRequest(AnswerService answerservice,SessionService sessionService,SessionMapper sessionMapper,JSONArray text,SseEmitter sseEmitter,String s_id,int modeId ,int user_id,int q_id,String messages,Session session,int flag) throws Exception {
+    public BigModelRequest(AnswerService answerservice,SessionService sessionService,SessionMapper sessionMapper,JSONArray text,SseEmitter sseEmitter,String s_id,int modeId ,int user_id,int q_id,int t_id,String messages,Session session,int flag) throws Exception {
         this.text=text;
         this.sseEmitter=sseEmitter;
         this.s_id=s_id;
@@ -62,6 +63,7 @@ public class BigModelRequest extends WebSocketListener {
         this.messages=messages;
         this.session=session;
         this.flag=flag;
+        this.t_id=t_id;
         this.answerService=answerservice;
         this.sessionService=sessionService;
         this.sessionMapper=sessionMapper;
@@ -152,7 +154,7 @@ public class BigModelRequest extends WebSocketListener {
             System.out.println("答案保存成功！");
             messages+=","+"{\"role\":\"assistant\",\"content\":\"" + data +"\"}";
             if(flag==1) {
-                sessionService.saveSession(s_id, q_id, a_id, modeId, 1, user_id,messages);
+                sessionService.saveSession(s_id, q_id, a_id, modeId, t_id, user_id,messages);
             }else {
                 UpdateWrapper<Session> updateWrapper = new UpdateWrapper<>();
                 updateWrapper.eq("id", s_id).eq("user_id", user_id);

@@ -35,8 +35,12 @@ public class KedaXunfeiService {
         prompt = jsonObj.getString("content");
         int user_id=jsonObj.getInt("id");
         String s_id=jsonObj.getString("sessionId");
+        int c_id=jsonObj.getInt("courseId");
+        int t_id=jsonObj.getInt("topicId");
+
+
         //插入+保存问题
-        int q_id= questionService.saveQuestion(user_id, 1,prompt );
+        int q_id= questionService.saveQuestion(user_id, c_id,prompt );
         //获取插入问题的id
         System.out.println("问题插入成功");
 
@@ -75,7 +79,7 @@ public class KedaXunfeiService {
         JSONArray textArray = JSON.parseArray("["+messages+"]");
 
 
-        bigModelRequest=new BigModelRequest(answerService,sessionService,sessionMapper,textArray,sseEmitter,s_id,modeId,user_id,q_id,messages,session,flag);
+        bigModelRequest=new BigModelRequest(answerService,sessionService,sessionMapper,textArray,sseEmitter,s_id,modeId,user_id,q_id,t_id,messages,session,flag);
 
 ////        data=bigModelRequest.getData();
 //        System.out.println("获得的回答："+data);
