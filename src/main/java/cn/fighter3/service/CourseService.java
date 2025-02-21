@@ -16,4 +16,8 @@ public interface CourseService {
     void batchDeleteCourse(List<Integer> ids);
     List<Course> getCoursesByStudentId(Integer studentId);
     List<Topic> getTopicsByCourseId(Integer courseId) ;
+    Integer addTopic(Topic topic);
+    Integer updateTopic(Topic topic);
+    Integer deleteTopic(Integer id);
+
 }

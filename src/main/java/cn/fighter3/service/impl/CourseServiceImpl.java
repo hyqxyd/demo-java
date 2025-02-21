@@ -59,5 +59,19 @@ public class CourseServiceImpl implements CourseService {
     public List<Topic> getTopicsByCourseId(Integer courseId) {
         return topicMapper.selectTopicsByCourseId(courseId);
     }
+    @Override
+    public Integer addTopic(Topic topic) {
+        return topicMapper.insert(topic);
+    }
+
+    @Override
+    public Integer updateTopic(Topic topic) {
+        return topicMapper.updateById(topic);
+    }
+
+    @Override
+    public Integer deleteTopic(Integer id) {
+        return topicMapper.deleteById(id);
+    }
 
 }

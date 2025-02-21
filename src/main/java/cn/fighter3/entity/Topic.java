@@ -1,14 +1,17 @@
 package cn.fighter3.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 @TableName("topics")
 public class Topic {
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.AUTO ,value = "topic_id")
+
     private int topicid;
     private String topicName;
+    @TableField("courses_id")
     private int coursesid;
 
 

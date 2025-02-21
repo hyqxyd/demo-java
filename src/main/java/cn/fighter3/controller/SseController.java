@@ -1,6 +1,7 @@
 package cn.fighter3.controller;
 
 import cn.fighter3.service.KedaXunfeiService;
+import cn.fighter3.service.KimiService;
 import cn.fighter3.service.TongyiQianwenService;
 import cn.fighter3.service.WenxinYiyanService;
 import org.json.JSONObject;
@@ -24,7 +25,8 @@ public class SseController {
     private TongyiQianwenService tongyiQianwenService;
     @Autowired
     private KedaXunfeiService kedaXunfeiService;
-
+    @Autowired
+    private KimiService kimiService;
     @GetMapping("/api/sse")
     public SseEmitter getChatStream(@RequestParam String prompt)  {
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
@@ -59,6 +61,15 @@ public class SseController {
             }catch (Exception e){
                 emitter.completeWithError(e);
             }
+
+        }else if ("kimi".equals(service)){
+            try {
+                kimiService.callKimiApi(prompt,emitter);
+
+            }catch (Exception e){
+                emitter.completeWithError(e);
+            }
+
 
         }
 

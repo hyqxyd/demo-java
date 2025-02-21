@@ -37,7 +37,7 @@ public class CourseController {
     }
 
     @PostMapping("/delete")
-    public Result deleteCourse(@RequestBody Integer id){
+    public Result deleteCourse(@RequestParam Integer id){
         return new Result(200,"",courseService.deleteCourse(id));
     }
 
@@ -59,6 +59,20 @@ public class CourseController {
         System.out.println(courseId);
         System.out.println(courseService.getTopicsByCourseId(courseId));
         return new Result(200,"",courseService.getTopicsByCourseId(courseId));
+    }
+    @PostMapping("/topic/add")
+    public Result addTopic(@RequestBody Topic topic) {
+        return new Result(200, "", courseService.addTopic(topic));
+    }
+
+    @PostMapping("/topic/update")
+    public Result updateTopic(@RequestBody Topic topic) {
+        return new Result(200, "", courseService.updateTopic(topic));
+    }
+
+    @PostMapping("/topic/delete/{id}")
+    public Result deleteTopic(@PathVariable("id") Integer id) {
+        return new Result(200, "", courseService.deleteTopic(id));
     }
 
 
