@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.fighter3.mapper.LearningRecordMapper">
+    <select id="getLearningRecordsByProblemId" resultType="LearningRecord">
+        SELECT * FROM learning_records WHERE problem_id = #{problemId}
+    </select>
+    <select id="getLearningRecordsByStudentAndProblem" resultType="LearningRecord">
+        SELECT * FROM learning_records WHERE student_id = #{studentId} AND problem_id = #{problemId}
+    </select>
+    <!-- LearningRecordMapper.xml -->
+    <select id="getDailyFrequency" resultType="cn.fighter3.dto.FrequencyDTO">
+        SELECT DATE(session_start_time) AS date, COUNT(*) AS count
+        FROM learning_records
+        WHERE student_id = #{studentId} AND problem_id = #{problemId}
+        GROUP BY DATE(session_start_time)
+    </select>
+
+    <!-- 模型使用次数统计（包含模型名称） -->
+    <select id="getModelUsageCount" resultType="cn.fighter3.dto.ModelUsageDTO">
+        SELECT
+        lr.model_used AS modelUsed,
+        m.model_name AS modelName,  <!-- 新增模型名称字段 -->
+        COUNT(*) AS count
+        FROM learning_records lr
+        LEFT JOIN models m ON lr.model_used = m.model_id
+        WHERE
+        lr.student_id = #{studentId}
+        AND lr.problem_id = #{problemId}
+        GROUP BY lr.model_used, m.model_name  <!-- 确保分组正确 -->
+    </select>
+
+    <select id="getDailyDuration" resultType="cn.fighter3.dto.DurationDTO">
+        SELECT DATE(session_start_time) AS date, SUM(duration) AS totalDuration
+        FROM learning_records
+        WHERE student_id = #{studentId} AND problem_id = #{problemId}
+        GROUP BY DATE(session_start_time)
+    </select>
+
+    <!-- 模型使用时长统计（包含模型名称） -->
+    <select id="getModelDuration" resultType="cn.fighter3.dto.ModelDurationDTO">
+        SELECT
+        lr.model_used AS modelUsed,
+        m.model_name AS modelName,  <!-- 新增模型名称字段 -->
+        SUM(lr.duration) AS totalDuration
+        FROM learning_records lr
+        LEFT JOIN models m ON lr.model_used = m.model_id
+        WHERE
+        lr.student_id = #{studentId}
+        AND lr.problem_id = #{problemId}
+        GROUP BY lr.model_used, m.model_name  <!-- 确保分组正确 -->
+    </select>
+
+<!--    <select id="getKeywords" resultType="KeywordDTO">-->
+<!--        SELECT keyword, COUNT(*) AS count-->
+<!--        FROM (-->
+<!--        SELECT SUBSTRING_INDEX(SUBSTRING_INDEX(keywords, ',', n.digit+1), ',', -1) AS keyword-->
+<!--        FROM learning_records-->
+<!--        JOIN (SELECT 0 digit UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3) n-->
+<!--        ON LENGTH(REPLACE(keywords, ',', '')) <= LENGTH(keywords)-n.digit-->
+<!--        WHERE student_id = #{studentId} AND problem_id = #{problemId}-->
+<!--        ) AS split_keywords-->
+<!--        GROUP BY keyword-->
+<!--    </select> &lt;!&ndash; 修复闭合标签 &ndash;&gt;-->
+</mapper>

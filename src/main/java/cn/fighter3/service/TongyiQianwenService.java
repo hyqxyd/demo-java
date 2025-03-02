@@ -50,6 +50,7 @@ public class TongyiQianwenService {
         String content = jsonObj.getString("content");
         int user_id = jsonObj.getInt("id");
         String s_id=jsonObj.getString("sessionId");
+
         int c_id=jsonObj.getInt("courseId");
         int t_id=jsonObj.getInt("topicId");
         //插入+保存问题
@@ -215,6 +216,7 @@ public class TongyiQianwenService {
                         String history = messages_c + "," + "{\"role\":\"system\",\"content\":\"" + data + "\"}";
                         System.out.println(flag);
                         if (flag == 1) {
+                            System.out.println(s_id);
                             sessionService.saveSession(s_id, q_id, a_id, modeId, t_id, user_id, history);
                         } else {
                             UpdateWrapper<Session> updateWrapper = new UpdateWrapper<>();

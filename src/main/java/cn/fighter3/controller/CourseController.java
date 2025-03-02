@@ -46,6 +46,13 @@ public class CourseController {
         courseService.batchDeleteCourse(ids);
         return new Result(200,"","");
     }
+    @GetMapping("/byteacher")
+    public Result getCoursesByTeacherId(@RequestParam("teacherId") Integer teacherId) {
+
+        System.out.println("老师id："+teacherId);
+        System.out.println("课程："+courseService.getCoursesByStudentId(teacherId));
+        return new Result(200,"",courseService.getCoursesByTeacherId(teacherId));
+    }
     @GetMapping("/coursesByStudent")
     public Result getCoursesByStudentId(@RequestParam("studentId") Integer studentId) {
 

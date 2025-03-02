@@ -16,4 +16,10 @@
         select * from courses_student
         WHERE student_id = #{studentId}
     </select>
+    <select id="getAllCourses" resultType="Course">
+        SELECT * FROM courses
+    </select>
+    <select id="getCourseById" resultType="Course">
+        SELECT * FROM courses WHERE course_id = #{courseId}
+    </select>
 </mapper>

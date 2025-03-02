@@ -22,6 +22,9 @@ public class CourseServiceImpl implements CourseService {
 
     @Autowired
     private TopicMapper topicMapper;
+    public List<Course> getAllCourses() {
+        return courseMapper.getAllCourses();
+    }
 
     @Override
     public IPage<Course> selectCoursePage(QueryDTO queryDTO) {
@@ -55,6 +58,11 @@ public class CourseServiceImpl implements CourseService {
 
 
       return courseMapper.selectCoursesByStudentId(studentId);
+    }
+    public List<Course> getCoursesByTeacherId(Integer teacherId) {
+
+
+        return courseMapper.selectCoursesByTeacherId(teacherId);
     }
     public List<Topic> getTopicsByCourseId(Integer courseId) {
         return topicMapper.selectTopicsByCourseId(courseId);

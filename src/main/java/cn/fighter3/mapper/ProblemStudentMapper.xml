@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.fighter3.mapper.ProblemStudentMapper">
+    <select id="selectStudentsWithLearnStatus" resultType="cn.fighter3.dto.StudentWithLearnStatusDTO">
+        SELECT
+        u.id AS studentId,
+        u.user_name AS userName,
+        u.email AS email,
+        ps.learned AS learned
+        FROM
+        user u
+        INNER JOIN problem_student ps ON u.id = ps.student_id
+        WHERE
+        ps.problem_id = #{problemId}
+    </select>
+</mapper>
