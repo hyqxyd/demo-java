@@ -35,8 +35,8 @@ public class KimiService {
     private final String MODEL_NAME = "moonshot-v1-8k";
     private final int modeId = 4; // Kimi模式标识
 
-    private int flag=0;
     public void callKimiApi(String prompt, SseEmitter sseEmitter) {
+        int flag=0;//是否是第一次提问
         JSONObject jsonObj = new JSONObject(prompt);
         String content = jsonObj.getString("content");
         int user_id = jsonObj.getInt("id");
@@ -67,6 +67,7 @@ public class KimiService {
             System.out.println(flag);
             messages+=message;
         }else {
+            System.out.println(flag);
             System.out.println("历史对话");
             messages=session.getContent();
             if(messages.endsWith("\n")){
@@ -112,7 +113,7 @@ public class KimiService {
 
         System.out.println(request.toString());
         final  String messages_c=messages;
-
+        final int flag_c=flag;
         ExecutorService executorService = Executors.newCachedThreadPool();
         executorService.execute(() -> {
 
@@ -182,8 +183,8 @@ public class KimiService {
                     int a_id = answerService.saveAnswer(q_id, data, modeId);
                     System.out.println("答案保存成功！");
                     String history = messages_c + "," + "{\"role\":\"system\",\"content\":\"" + data + "\"}";
-                    System.out.println(flag);
-                    if (flag == 1) {
+                    System.out.println(flag_c);
+                    if (flag_c == 1) {
                         sessionService.saveSession(s_id, q_id, a_id, modeId, t_id, user_id, history);
                     } else {
                         UpdateWrapper<Session> updateWrapper = new UpdateWrapper<>();

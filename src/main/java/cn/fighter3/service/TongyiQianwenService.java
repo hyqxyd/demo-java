@@ -41,11 +41,12 @@ public class TongyiQianwenService {
     @Autowired
     private SessionMapper sessionMapper;
     private int modeId = 2;
-    private  int flag=0;
+
     @Autowired
     private OkHttpClient okHttpClient;
 
     public  void callWithMessage(String prompt , SseEmitter sseEmitter) throws ApiException, NoApiKeyException, InputRequiredException {
+        int flag=0;
         JSONObject jsonObj = new JSONObject(prompt);
         String content = jsonObj.getString("content");
         int user_id = jsonObj.getInt("id");
@@ -148,7 +149,7 @@ public class TongyiQianwenService {
 
         System.out.println(request.toString());
         final  String messages_c=messages;
-
+        final  int flag_c=flag;
         ExecutorService executorService = Executors.newCachedThreadPool();
         executorService.execute(() -> {
 
@@ -214,8 +215,8 @@ public class TongyiQianwenService {
                         int a_id = answerService.saveAnswer(q_id, data, modeId);
                         System.out.println("答案保存成功！");
                         String history = messages_c + "," + "{\"role\":\"system\",\"content\":\"" + data + "\"}";
-                        System.out.println(flag);
-                        if (flag == 1) {
+                        System.out.println(flag_c);
+                        if (flag_c == 1) {
                             System.out.println(s_id);
                             sessionService.saveSession(s_id, q_id, a_id, modeId, t_id, user_id, history);
                         } else {

@@ -27,10 +27,11 @@ public class KedaXunfeiService {
     private BigModelRequest bigModelRequest;
     private   String data = null;
     private String messages="";
-    private  int flag=0;
+//    private  int flag=0;
     private int modeId = 3;
 
     public void sendStreamRequest(String prompt ,SseEmitter sseEmitter) throws Exception {
+        int flag=0;
         JSONObject jsonObj = new JSONObject(prompt);
         prompt = jsonObj.getString("content");
         int user_id=jsonObj.getInt("id");

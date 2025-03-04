@@ -43,7 +43,6 @@ public class WenxinYiyanService {
     private SessionMapper sessionMapper;
 
     private int modeId = 1;
-    private  int flag=0;
 
     private OkHttpClient client = new OkHttpClient();
     @Autowired
@@ -76,6 +75,7 @@ public String getAccessToken() throws IOException {
 }
 
     public void sendStreamRequest(String prompt, SseEmitter sseEmitter) throws Exception {
+        int flag=0;
         String accessToken = getAccessToken();
         MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
         //查询历史记录
@@ -133,6 +133,7 @@ public String getAccessToken() throws IOException {
         //处理流式响应
 
         final String messages_c = messages;
+        final int flag_c=flag;
         ExecutorService executorService = Executors.newCachedThreadPool();
         executorService.execute(()->{
             String answer = "";
@@ -169,7 +170,7 @@ public String getAccessToken() throws IOException {
                 //String answer = r.getString("result");
                 int a_id = answerService.saveAnswer(q_id, answer, modeId);
                 String history =messages_c+ "," + "{\"role\":\"assistant\",\"content\":\"" + answer + "\"}";
-                if (flag == 1) {
+                if (flag_c == 1) {
                     sessionService.saveSession(s_id, q_id, a_id, modeId, t_id, user_id, history);
                 } else {
                     UpdateWrapper<Session> updateWrapper = new UpdateWrapper<>();
