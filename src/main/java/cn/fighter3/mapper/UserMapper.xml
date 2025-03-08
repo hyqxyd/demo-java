@@ -6,7 +6,7 @@
         <where>
             <if test="keyword !=null and keyword !='' ">
                 or id like CONCAT('%',#{keyword},'%')
-                or username like CONCAT('%',#{keyword},'%')
+                or user_name like CONCAT('%',#{keyword},'%')
                 or email like CONCAT('%',#{keyword},'%')
                 or role like CONCAT('%',#{keyword},'%')
             </if>

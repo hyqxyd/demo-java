@@ -54,7 +54,7 @@ public class UserController {
      */
     @PostMapping("/api/user/update")
     public Result updateUser(@RequestBody User user){
-        return new Result(200,"",userService.updateUser(user));
+        return new Result(200,"更新成功",userService.updateUser(user));
     }
 
     /**
@@ -64,7 +64,7 @@ public class UserController {
      */
     @PostMapping("/api/user/delete")
     public Result deleteUser(Integer id){
-        return new Result(200,"",userService.deleteUser(id));
+        return new Result(200,"删除成功",userService.deleteUser(id));
     }
 
     /**
