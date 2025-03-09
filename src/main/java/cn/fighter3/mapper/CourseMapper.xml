@@ -8,7 +8,7 @@
                 or course_id like CONCAT('%', #{keyword}, '%')
                 or course_name like CONCAT('%', #{keyword}, '%')
                 or course_description like CONCAT('%', #{keyword}, '%')
-                or teacherId like CONCAT('%', #{keyword}, '%')
+                or teacher_id like CONCAT('%', #{keyword}, '%')
             </if>
         </where>
     </select>
