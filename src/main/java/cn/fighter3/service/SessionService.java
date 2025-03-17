@@ -48,5 +48,10 @@ public class SessionService {
     //删除对话
     public void deleteSession(String id) {sessionMapper.deleteById(id);
     }
-
+    public List<Session> getSessionListByUserId(int userId) {
+        return sessionMapper.selectByUserId(userId);
+    }
+    public Session getSessionById(String id) {
+        return sessionMapper.selectById(id);
+    }
 }

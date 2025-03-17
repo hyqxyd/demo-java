@@ -61,7 +61,8 @@ public class SessionController {
         int m_id=session.getMId();
         String.valueOf(m_id);
         String json="["+session.getContent()+"]";
-         System.out.println(json);
+         System.out.println("session.content:"+json);
+
         JSONArray jsonArray = JSON.parseArray(json);
         List<Map<String, Object>> messages =new ArrayList<>();
         for (int i = 0; i < jsonArray.size(); i++) {
@@ -74,5 +75,14 @@ public class SessionController {
         System.out.println(messages);
        return new Result(200,  String.valueOf(m_id), messages);
     }
-
+    @GetMapping("/listByUserId/{userId}")
+    public Result sessionListByUserId(@PathVariable int userId) {
+        List<Session> sessionList = sessionService.getSessionListByUserId(userId);
+        return new Result(200, "Success", sessionList);
+    }
+    @GetMapping("/session/{sessionId}")
+    public Result getSessionById(@PathVariable String sessionId) {
+        Session session = sessionService.getSessionById( sessionId);
+        return new Result(200, "Success", session);
+    }
 }
