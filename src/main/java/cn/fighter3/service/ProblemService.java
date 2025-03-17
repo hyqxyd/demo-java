@@ -14,6 +14,11 @@ public class ProblemService {
     public List<Problem> getProblemsByTopicId(int topicId) {
         return problemMapper.getProblemsByTopicId(topicId);
     }
+    public void insertProblemStudent(Integer problemId, Integer studentId) {
+        problemMapper.insertProblemStudent(problemId, studentId,1);
+    }
 
-
+    public void updateProblemStudent(Integer problemId, Integer studentId) {
+        problemMapper.updateProblemStudent(problemId, studentId);
+    }
 }
