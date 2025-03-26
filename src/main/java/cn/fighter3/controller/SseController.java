@@ -39,7 +39,7 @@ public class SseController {
 
 
         try {
-            wenxinYiyanService.sendStreamRequest(prompt, emitter);
+            wenxinYiyanService.callWithMessage(prompt, emitter);
         } catch (Exception e) {
             emitter.completeWithError(e);
         }
@@ -64,7 +64,7 @@ public class SseController {
 
         }else if ("kimi".equals(service)){
             try {
-                kimiService.callKimiApi(prompt,emitter);
+                kimiService.callWithMessage(prompt,emitter);
 
             }catch (Exception e){
                 emitter.completeWithError(e);
