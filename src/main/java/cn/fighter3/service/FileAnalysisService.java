@@ -89,6 +89,7 @@ public class FileAnalysisService {
                                 new File("opt\\springboot\\app\\src\\main\\resources\\upload\\"+service+"\\"+filename)))
                 .addFormDataPart("conversation_id",conversationId)
                 .build();
+
         Request request = new Request.Builder()
                 .url("https://qianfan.baidubce.com/v2/app/conversation/file/upload")
                 .method("POST", body)
