@@ -1,177 +1,90 @@
 package cn.fighter3.service;
 
-import cn.fighter3.service.BigModelRequest;
-
 import cn.fighter3.entity.Session;
 import cn.fighter3.mapper.SessionMapper;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import org.json.JSONObject;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.WebSocket;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-
 @Service
 public class KedaXunfeiService {
     @Autowired
-    private QuestionService questionService ;
+    private QuestionService questionService;
     @Autowired
     private AnswerService answerService;
     @Autowired
     private SessionService sessionService;
     @Autowired
     private SessionMapper sessionMapper;
-    private BigModelRequest bigModelRequest;
-    private   String data = null;
-    private String messages="";
-//    private  int flag=0;
-    private int modeId = 3;
+    @Autowired
+    private OkHttpClient okHttpClient;
 
-    public void sendStreamRequest(String prompt ,SseEmitter sseEmitter) throws Exception {
-        int flag=0;
-        JSONObject jsonObj = new JSONObject(prompt);
-        prompt = jsonObj.getString("content");
-        int user_id=jsonObj.getInt("id");
-        String s_id=jsonObj.getString("sessionId");
-        int c_id=jsonObj.getInt("courseId");
-        int t_id=jsonObj.getInt("topicId");
+    private final int modeId = 3;
 
+    public void sendStreamRequest(String prompt, SseEmitter sseEmitter) throws Exception {
+        // 解析输入参数
+        JSONObject jsonObj = JSON.parseObject(prompt);
+        String content = jsonObj.getString("content");
+        int userId = jsonObj.getIntValue("id");
+        String sessionId = jsonObj.getString("sessionId");
+        int courseId = jsonObj.getIntValue("courseId");
+        int topicId = jsonObj.getIntValue("topicId");
 
-        //插入+保存问题
-        int q_id= questionService.saveQuestion(user_id, c_id,prompt );
-        //获取插入问题的id
-        System.out.println("问题插入成功");
+        // 保存问题并获取ID
+        int questionId = questionService.saveQuestion(userId, courseId, content);
 
-        System.out.println(prompt);
+        // 获取或初始化会话
+        Session session = sessionMapper.selectOne(
+                new QueryWrapper<Session>().eq("id", sessionId).eq("user_id", userId)
+        );
+        JSONArray messageArray = (session == null) ?
+                new JSONArray() :
+                JSON.parseArray(session.getContent());
 
+        // 添加用户消息（转义特殊字符）
+        JSONObject userMessage = new JSONObject();
+        userMessage.put("role", "user");
+        userMessage.put("content", escapeContent(content));
+        messageArray.add(userMessage);
 
-        if (prompt.endsWith("\n")) {
-            prompt = prompt.substring(0, prompt.length() - 1);
-        }
-        String message="{\"role\":\"user\",\"content\":\"" + prompt +"\"}";
-        Session session=sessionMapper.selectOne(new QueryWrapper<Session>().eq("id", s_id).eq("user_id", user_id));
-        messages="";
-        if(session==null){
-            System.out.println("新对话");
+        // 创建WebSocket监听器
+        BigModelRequest listener = new BigModelRequest(
+                answerService,
+                sessionService,
+                sessionMapper,
+                messageArray,
+                sseEmitter,
+                sessionId,
+                modeId,
+                userId,
+                questionId,
+                topicId,
+                messageArray.toJSONString(),
+                session
+        );
 
-            flag=1;//第一次提问
-            messages+=message;
-        }else {
-            System.out.println("历史对话");
-            messages=session.getContent();
-            if(messages.endsWith("\n")){
-                messages=messages.substring(0,messages.length()-1);
-            }
-            messages=messages+","+message;
-        }
-//        OkHttpClient client = new OkHttpClient();
-//        MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+        // 构建WebSocket请求
+        Request request = new Request.Builder()
+                .url(listener.buildWebSocketUrl())
+                .build();
 
-
-//
-//        String jsonBody = "{\"model\": \"generalv3.5\", \"messages\": [{\"role\": \"user\", \"content\": \"" + prompt + "\"}], \"stream\": true}";
-//        RequestBody body = RequestBody.create(JSON, jsonBody);
-
-        System.out.println(messages);
-
-        JSONArray textArray = JSON.parseArray("["+messages+"]");
-
-
-        bigModelRequest=new BigModelRequest(answerService,sessionService,sessionMapper,textArray,sseEmitter,s_id,modeId,user_id,q_id,t_id,messages,session,flag);
-
-////        data=bigModelRequest.getData();
-//        System.out.println("获得的回答："+data);
-//        int a_id=answerService.saveAnswer(q_id, data,modeId);
-//        System.out.println("答案保存成功！");
-//        messages+=","+"{\"role\":\"assistant\",\"content\":\"" + data +"\"}";
-//        System.out.println(flag);
-//        if(flag==1) {
-//            sessionService.saveSession(s_id, q_id, a_id, modeId, 1, user_id,messages);
-//        }else {
-//            UpdateWrapper<Session> updateWrapper = new UpdateWrapper<>();
-//            updateWrapper.eq("id", s_id).eq("user_id", user_id);
-//
-//            Session newsession = session;
-//            newsession.setContent(messages);
-//            newsession.setSessionTime();
-//
-//            sessionMapper.update(newsession, updateWrapper);
-//
-//        }
-
-//       while (true){
-//            if(messageCallback.getMessage()=="回答结束"){
-//                data = bigModelRequest.getData();
-//                break;
-//            }
-//
-//       }
-
-
-
-//        Request request = new Request.Builder()
-//                .url("https://spark-api-open.xf-yun.com/v1/chat/completions")
-//                .post(body)
-//                .addHeader("Authorization", "Bearer wpuUVYmYaGKOhVVpqSFn:fQutxWlZOvFZBVosYOht") // 注意此处替换自己的API密钥
-//                .build();
-
-
-//        try (Response response = client.newCall(request).execute()) {
-//            if (!response.isSuccessful()) {
-//                System.err.println("请求失败: " + response.code());
-//                throw new RuntimeException("请求失败: " + response);
-//            }
-//            data = "";
-//            // 处理流式响应
-//            ResponseBody responseBody = response.body();
-//
-//            if (responseBody != null) {
-//                BufferedSource source = responseBody.source();
-//
-//                while (!source.exhausted()) {
-//                    String line = source.readUtf8LineStrict();
-//                    System.out.println(line);
-//                    if (line.trim().isEmpty() || line.contains("[DONE]")) {
-//                        continue; // 跳过空行
-//                    }
-//                    // 解析JSON格式的行
-//                    JSONObject jsonObject = new JSONObject("{" + line + "}");
-//                    String content = jsonObject.getJSONObject("data").toString();
-//                    jsonObject = new JSONObject(content);
-//                    JSONObject choicesObject = jsonObject.getJSONArray("choices").getJSONObject(0);
-//                    JSONObject deltaObject = choicesObject.getJSONObject("delta");
-//
-//                    content = deltaObject.getString("content");
-//                    System.out.println("Content: " + content);
-//                    data += content;
-//                }
-//                System.out.println(data);
-//                int a_id=answerService.saveAnswer(q_id, data,modeId);
-//                System.out.println("答案保存成功！");
-//                messages+=","+"{\"role\":\"assistant\",\"content\":\"" + data +"\"}";
-//                System.out.println(flag);
-//                if(flag==1) {
-//                    sessionService.saveSession(s_id, q_id, a_id, modeId, 1, user_id,messages);
-//                }else {
-//                    UpdateWrapper<Session> updateWrapper = new UpdateWrapper<>();
-//                    updateWrapper.eq("id", s_id).eq("user_id", user_id);
-//
-//                    Session newsession = session;
-//                    newsession.setContent(messages);
-//                    newsession.setSessionTime();
-//
-//                    sessionMapper.update(newsession, updateWrapper);
-//
-//                }
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-
+        // 发起WebSocket连接
+        WebSocket webSocket = okHttpClient.newWebSocket(request, listener);
+        listener.setWebSocket(webSocket);
     }
 
-
+    private String escapeContent(String content) {
+        return content.replace("\\", "")
+                .replace("\"", "")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t");
+    }
 }
