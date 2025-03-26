@@ -13,7 +13,7 @@
         </where>
     </select>
     <!-- 批量插入用户 -->
-    <insert id="batchInsertUsers">
+    <insert id="batchInsertUsers"  useGeneratedKeys="true" keyProperty="id">
         INSERT INTO user (user_name, password, email, role) VALUES
         <foreach collection="list" item="user" separator=",">
             (#{user.userName}, #{user.password}, #{user.email}, #{user.role})

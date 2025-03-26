@@ -50,7 +50,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void batchAddUsers(List<User> users) {
-        userMapper.batchInsertUsers(users);
+    public  List<User> batchAddUsers(List<User> users) {
+         userMapper.batchInsertUsers(users);
+        return users;
     }
 }

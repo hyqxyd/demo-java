@@ -20,8 +20,8 @@ public class LearningRecordController {
     @PostMapping("/learning-records/save")
     public Result saveLearningRecords(@RequestBody LearningRecord learningRecord) {
 
-        problemService.insertProblemStudent(learningRecord.getProblemId(),learningRecord.getStudentId());
-       // problemService.updateProblemStudent(learningRecord.getProblemId(),learningRecord.getStudentId());
+        //problemService.insertProblemStudent(learningRecord.getProblemId(),learningRecord.getStudentId());
+       problemService.updateProblemStudent(learningRecord.getProblemId(),learningRecord.getStudentId());
         return new Result(200,"",learningRecordService.save(learningRecord));
     }
 

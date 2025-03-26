@@ -1,5 +1,6 @@
 package cn.fighter3.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
@@ -8,6 +9,7 @@ import lombok.Data;
 public class ProblemStudent {
     private Integer problemId;
     private Integer studentId;
+    @TableField(exist = false)
     private Boolean learned;
 
     public ProblemStudent(Integer problemId, Integer studentId, Boolean learned) {
