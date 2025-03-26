@@ -116,6 +116,7 @@ public class FileAnalysisService {
         System.out.println(conversationId);
 
 
+
         MediaType mediaType = MediaType.parse("application/json");
         RequestBody body = RequestBody.create(mediaType, "{\"app_id\":\"dc6d8359-b428-4afa-9387-cd0cdea8c9bf\",\"query\":\"总结\",\"conversation_id\":\""+conversationId+"\",\"stream\":true,\"file_ids\":[\""+id+"\"]}");
         Request request = new Request.Builder()
