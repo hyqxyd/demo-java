@@ -58,12 +58,15 @@ public class DeepSeekService {
                     if (line != null && line.startsWith("data:")) {
                         String jsonContent = line.substring(5).trim();
                         if (!jsonContent.isEmpty()) {
+
                             String content = parseResponse(jsonContent);
+                            System.out.println(content);
                             fullResponse.append(content);
                         }
                     }
                 }
             }
+            System.out.println(fullResponse.toString());
             return fullResponse.toString();
         } catch (IOException e) {
             e.printStackTrace();
@@ -146,8 +149,30 @@ public class DeepSeekService {
     // 新增方法：构建评估prompt
     private String buildPrompt(String interaction) {
         return "你是一个教育专家，请基于Bloom认知模型分析以下对话（0-100分），评估维度：\n"
-                + "1. 知识理解深度（40%）\n2. 复杂应用能力（30%）\n3. 批判性思维（20%）\n4. 元认知（10%）\n\n"
-                + "返回JSON格式：{\"score\": 分数, \"analysis\": \"分析内容\"}\n\n对话记录：\n"
+                + "1. 按六个维度单独评分（0-100分）：\n"
+                + "   - 记忆(Remember): 信息复现准确性\n"
+                + "   - 理解(Understand): 概念转化能力\n"
+                + "   - 应用(Apply): 知识迁移效果\n"
+                + "   - 分析(Analyze): 逻辑解构深度\n"
+                + "   - 评价(Evaluate): 批判论证质量\n"
+                + "   - 创造(Create): 创新性解决方案\n\n"
+                + "2. 权重分配：\n"
+                + "   记忆(15%) | 理解(20%) | 应用(25%)\n"
+                + "   分析(20%) | 评价(12%) | 创造(8%)\n\n"
+                + "3. 返回JSON格式：\n"
+                + "{\n"
+                + "   \"dimension_scores\": {\n"
+                + "       \"remember\": 记忆分数,\n"
+                + "       \"understand\": 理解分数,\n"
+                + "       \"apply\": 应用分数,\n"
+                + "       \"analyze\": 分析分数,\n"
+                + "       \"evaluate\": 评价分数,\n"
+                + "       \"create\": 创造分数\n"
+                + "   },\n"
+                + "   \"score\": 总分,\n" // 计算验证：(85*0.15)+(90*0.2)+(78*0.25)+(82*0.2)+(88*0.12)+(75*0.08)
+                + "   \"analysis\": \"逐项分析各维度表现，突出优势与改进建议\"\n"
+                + "}\n\n"
+                + "对话记录：\n"
                 + interaction;
     }
     // 新增流式响应解析方法
