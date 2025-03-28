@@ -2,7 +2,6 @@ package cn.fighter3.service.impl;
 
 import cn.fighter3.dto.QueryDTO;
 import cn.fighter3.entity.Course;
-import cn.fighter3.entity.Course_student;
 import cn.fighter3.entity.Topic;
 import cn.fighter3.mapper.CourseMapper;
 import cn.fighter3.mapper.TopicMapper;
@@ -30,8 +29,10 @@ public class CourseServiceImpl implements CourseService {
     public IPage<Course> selectCoursePage(QueryDTO queryDTO) {
         Page<Course> page = new Page<>(queryDTO.getPageNo(), queryDTO.getPageSize());
         //System.out.println("我在哪？");
-        //System.out.println(  courseMapper.selectCoursePage(page, queryDTO.getKeyword()));
-        return courseMapper.selectCoursePage(page, queryDTO.getKeyword());
+        System.out.println("这里是测试数据@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@queryDTO.getTeacherId()===="+queryDTO.getTeacherId());
+        IPage<Course> result = courseMapper.selectCoursePage(page, queryDTO.getKeyword());
+        System.out.println(result);
+        return result;
     }
 
     @Override

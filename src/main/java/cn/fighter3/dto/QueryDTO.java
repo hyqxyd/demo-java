@@ -11,6 +11,16 @@ public class QueryDTO {
     private Integer pageSize;  //页面大小
     private String keyword;    //关键字
 
+    private Integer teacherId;         //id
+
+    public Integer getTeacherId() {
+        return teacherId;
+    }
+
+    public void setTeacherId(Integer teacherId) {
+        this.teacherId = teacherId;
+    }
+
     public Integer getPageNo() {
         return pageNo;
     }

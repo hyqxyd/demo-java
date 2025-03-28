@@ -1,7 +1,7 @@
 package cn.fighter3.mapper;
 
 import cn.fighter3.entity.Course;
-import cn.fighter3.entity.Course_student;
+import cn.fighter3.entity.CourseStudent;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -19,4 +19,6 @@ public interface CourseMapper extends BaseMapper<Course> {
 
     @Select("SELECT c.* FROM courses c JOIN teacher_course tc ON c.course_id = tc.course_id WHERE tc.teacher_id = #{teacherId} ")
     List<Course> selectCoursesByTeacherId(@Param("teacherId") Integer teacherId);
+
+
 }
