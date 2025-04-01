@@ -12,6 +12,13 @@
             (#{item.problemId}, #{item.studentId}, DEFAULT)
         </foreach>
     </insert>
-
+    <insert id="batchBindProblemToStudents">
+        INSERT IGNORE INTO problem_student
+        (problem_id, student_id, learned)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.problemId}, #{item.studentId}, DEFAULT)
+        </foreach>
+    </insert>
 
 </mapper>

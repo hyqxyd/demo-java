@@ -3,11 +3,13 @@ package cn.fighter3.controller;
 import cn.fighter3.dto.QueryDTO;
 import cn.fighter3.dto.QueryIdDTO;
 import cn.fighter3.entity.Course;
+import cn.fighter3.entity.Problem;
 import cn.fighter3.entity.Topic;
 import cn.fighter3.entity.User;
 import cn.fighter3.result.Result;
 import cn.fighter3.service.CourseService;
 import cn.fighter3.service.ExcelService;
+import cn.fighter3.service.ProblemService;
 import cn.fighter3.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +26,8 @@ public class CourseController {
     private ExcelService excelService;
     @Autowired
     private UserService userService;
-
+    @Autowired
+    private ProblemService problemService;
     @PostMapping("/import-students")
     public Result importStudentsToCourse(@RequestParam("file") MultipartFile file, @RequestParam("courseId") Integer courseId){
         try {
@@ -122,6 +125,28 @@ public class CourseController {
     public Result deleteTopic(@PathVariable("id") Integer id) {
         return new Result(200, "", courseService.deleteTopic(id));
     }
+    @GetMapping("/problems")
+    public Result getProblemsByTopicId(@RequestParam("topicId")  Integer topicId) {
+        System.out.println(topicId);
+        System.out.println(problemService.getProblemsByTopicId(topicId));
+        return new Result(200,"",problemService.getProblemsByTopicId(topicId));
+    }
+    @PostMapping("/problem/add")
+    public Result addProblem(@RequestBody Problem problem) {
+        return new Result(200, "", problemService.addProblem(problem));
+    }
+
+    @PostMapping("/problem/update")
+    public Result updateProblem(@RequestBody Problem problem) {
+        return new Result(200, "",problemService.updateProblem(problem));
+    }
+
+    @PostMapping("/problem/delete/{id}")
+    public Result deleteProblem(@PathVariable("id") Integer id) {
+        return new Result(200, "", problemService.deleteProblem(id));
+    }
+
+
 
 
 
