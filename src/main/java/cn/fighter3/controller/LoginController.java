@@ -21,7 +21,10 @@ public class LoginController {
 
     @PostMapping(value = "/api/login")
     public Result login(@RequestBody LoginDTO loginDTO){
-      return loginService.login(loginDTO);
+      System.out.println(loginDTO.getId());
+
+
+        return loginService.login(loginDTO);
     }
 
     @PostMapping(value = "/api/hello")

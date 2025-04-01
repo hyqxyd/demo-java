@@ -21,16 +21,21 @@ public class ExcelService {
             for (Row row : sheet) {
                 if (row.getRowNum() == 0) continue; // Skip header row
                 User user = new User();
+
                 Cell cell = row.getCell(0);
+                double doubleValue = Double.parseDouble(cell.toString());  // 先转Double
+                int value = (int) doubleValue;  // 显式类型转换（注意精度丢失）
+                user.setId(value);
+                cell=row.getCell(1);
                 user.setUserName(getCellValueAsString(cell));
 
-                cell = row.getCell(1);
+                cell = row.getCell(2);
                 user.setPassword(getCellValueAsString(cell));
 
-                cell = row.getCell(2);
+                cell = row.getCell(3);
                 user.setEmail(getCellValueAsString(cell));
 
-                cell = row.getCell(3);
+                cell = row.getCell(4);
                 user.setRole(getCellValueAsString(cell));
 
                 users.add(user);
@@ -50,7 +55,13 @@ public class ExcelService {
                 if (DateUtil.isCellDateFormatted(cell)) {
                     return cell.getDateCellValue().toString();
                 } else {
-                    return String.valueOf(cell.getNumericCellValue());
+                    double value = cell.getNumericCellValue();
+                    // 判断是否是整数
+                    if (value == (long) value) {
+                        return String.valueOf((long) value);
+                    } else {
+                        return String.valueOf(value);
+                    }
                 }
             case BOOLEAN:
                 return String.valueOf(cell.getBooleanCellValue());
