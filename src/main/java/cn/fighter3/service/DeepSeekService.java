@@ -38,11 +38,11 @@ public class DeepSeekService {
 
         try {
             Request request = new Request.Builder()
-                    .url("https://api.deepseek.com/chat/completions")
+                    .url("https://maas-api.ai-yuanjing.com/openapi/compatible-mode/v1/chat/completions")
                     .post(RequestBody.create(mediaType, JSON.toJSONString(requestBody)))
                     .addHeader("Content-Type", "application/json")
                     .addHeader("Accept","application/json")
-                    .addHeader("Authorization", "Bearer sk-7e5617f5f6d24d85a589559a34bb6287")
+                    .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImIzODRmZDhhLWNmZjUtNDY2Yi04MTliLWVlZWNiNDM3NmIyMyIsInVzZXJuYW1lIjoieGlseTExIiwibmlja25hbWUiOiLluK3npLzmtIsiLCJ1c2VyVHlwZSI6MCwiYnVmZmVyVGltZSI6MTc0MjIxNTIxNywiZXhwIjoxNzQ0ODAwMDE3LCJqdGkiOiI2ZmJjM2Q1ZTJkMzg0NWE3YTNhNGQyOGRhZmNkNjBmYSIsImlhdCI6MTc0MjIwNzg5NywiaXNzIjoiYjM4NGZkOGEtY2ZmNS00NjZiLTgxOWItZWVlY2I0Mzc2YjIzIiwibmJmIjoxNzQyMjA3ODk3LCJzdWIiOiJrb25nIn0.7c4_cGSd9muxHExDq-hdE0c3oqAJJ-zBZFLD_TpXkVQ")
                     .build();
 
             StringBuilder fullResponse = new StringBuilder();
@@ -108,7 +108,7 @@ public class DeepSeekService {
 
         // 构建完整请求体
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("model", "deepseek-chat");
+        requestBody.put("model", "deepseek-v3");
 
         // 构建messages列表（包含system和user消息）
         List<Map<String, String>> messages = new ArrayList<>();
@@ -126,20 +126,9 @@ public class DeepSeekService {
         // 添加其他参数
         requestBody.put("frequency_penalty", 0);
         requestBody.put("max_tokens", 2048);
-        requestBody.put("presence_penalty", 0);
         // 构建response_format对象
-        Map<String, String> responseFormat = new HashMap<>();
-        responseFormat.put("type", "text");//待定 json_object
-        requestBody.put("response_format", responseFormat);
-        requestBody.put("stop", null);
         requestBody.put("stream", true);
-        requestBody.put("stream_options", null);
-        requestBody.put("temperature", 1.0);
         requestBody.put("top_p", 1.0);
-        requestBody.put("tools", null);
-        requestBody.put("tool_choice", "none");
-        requestBody.put("logprobs", false);
-        requestBody.put("top_logprobs", null);
 
         return streamToDeepSeek(requestBody);
     }
@@ -148,17 +137,20 @@ public class DeepSeekService {
 
     // 新增方法：构建评估prompt
     private String buildPrompt(String interaction) {
-        return "你是一个教育专家，请基于Bloom认知模型分析以下对话（0-100分），评估维度：\n"
-                + "1. 按六个维度单独评分（0-100分）：\n"
-                + "   - 记忆(Remember): 信息复现准确性\n"
-                + "   - 理解(Understand): 概念转化能力\n"
-                + "   - 应用(Apply): 知识迁移效果\n"
-                + "   - 分析(Analyze): 逻辑解构深度\n"
-                + "   - 评价(Evaluate): 批判论证质量\n"
-                + "   - 创造(Create): 创新性解决方案\n\n"
-                + "2. 权重分配：\n"
-                + "   记忆(15%) | 理解(20%) | 应用(25%)\n"
-                + "   分析(20%) | 评价(12%) | 创造(8%)\n\n"
+        return "作为教育评估专家，请基于修订版Bloom认知分类法(Krathwohl, 2002)和问题分类理论(Nirenburg et al., 2023)，对用户提出的问题进行认知层次分析。\n\n"
+                + "# 评估标准（依据ACM SIGCSE 2023）\n"
+                + "1. 认知维度评分（0-100）：\n"
+                + "   - 记忆(15%)：术语准确性（Mayer认知负荷理论,2019）\n"
+                + "   - 理解(20%)：概念转化（Chi自我解释理论,2020）\n"
+                + "   - 应用(25%)：情境迁移（Koedinger模型,2022）\n"
+                + "   - 分析(20%)：逻辑解构（Graesser框架,2021）\n"
+                + "   - 评价(12%)：论证质量（Toulmin模型,2023）\n"
+                + "   - 创造(8%)：创新等级（Runco指数,2023）\n\n"
+                + "2. 分析要求：\n"
+                + "   - 每个维度必须包含：\n"
+                + "     a) 2个问题中的文本证据\n"
+                + "     b) 1个理论依据引用\n"
+                + "   - 创新评分需满足：跨领域/专利要素/创新指数≥0.7\n\n"
                 + "3. 返回JSON格式：\n"
                 + "{\n"
                 + "   \"dimension_scores\": {\n"
@@ -171,9 +163,13 @@ public class DeepSeekService {
                 + "   },\n"
                 + "   \"score\": 总分,\n" // 计算验证：(85*0.15)+(90*0.2)+(78*0.25)+(82*0.2)+(88*0.12)+(75*0.08)
                 + "   \"analysis\": \"逐项分析各维度表现，突出优势与改进建议\"\n"
+                + "#analysis 示例分析片段：\n"
+                + "\"记忆 85分：问题中精确使用'时间复杂度'术语（证据1），正确引用'10万条数据耗时3秒'（证据2），符合Mayer认知负荷理论的精确性要求（理论依据）。\n"
+
                 + "}\n\n"
                 + "对话记录：\n"
-                + interaction;
+                + interaction
+                + "\n\n请根据上述评估标准，对对话记录中role==user的content进行认知层次分析，不要对role==assistant的content进行分析，我需要的是用户提出的问题进行分析并返回JSON格式的评估结果。";
     }
     // 新增流式响应解析方法
     private String parseResponse(String chunk) {
