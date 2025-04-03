@@ -4,6 +4,7 @@ import cn.fighter3.entity.LearningRecord;
 import cn.fighter3.entity.LearningRecordUpdate;
 import cn.fighter3.result.Result;
 import cn.fighter3.service.LearningRecordService;
+import cn.fighter3.service.ProblemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,11 +15,13 @@ import java.util.List;
 public class LearningRecordController {
     @Autowired
     private LearningRecordService learningRecordService;
+    @Autowired
+    private ProblemService problemService;
     @PostMapping("/learning-records/save")
     public Result saveLearningRecords(@RequestBody LearningRecord learningRecord) {
 
-
-
+        //problemService.insertProblemStudent(learningRecord.getProblemId(),learningRecord.getStudentId());
+       problemService.updateProblemStudent(learningRecord.getProblemId(),learningRecord.getStudentId());
         return new Result(200,"",learningRecordService.save(learningRecord));
     }
 

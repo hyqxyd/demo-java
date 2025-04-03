@@ -7,16 +7,17 @@ package cn.fighter3.dto;
  **/
 
 public class LoginDTO {
-    private String loginName;
+
+    private String id;
     private String password;
     private String role;
 
-    public String getLoginName() {
-        return loginName;
-    }
+   public String getId() {
+       return id;
+   }
 
-    public void setLoginName(String loginName) {
-        this.loginName = loginName;
+    public void setId(String Id) {
+        this.id = Id;
     }
 
     public String getPassword() {

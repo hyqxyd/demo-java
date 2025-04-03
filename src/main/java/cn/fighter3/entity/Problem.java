@@ -28,6 +28,9 @@ public class Problem {
     public Integer getTopicId() {
         return this.topicId;
     }
+    public void setTopicId(Integer topicId) {
+        this.topicId = topicId;
+    }
 
 
 

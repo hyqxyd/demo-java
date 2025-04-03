@@ -3,5 +3,22 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.fighter3.mapper.ProblemMapper">
+    <!-- ProblemMapper.xml 映射文件 -->
+    <insert id="batchBindStudentsToProblems">
+        INSERT IGNORE INTO problem_student
+        (problem_id, student_id, learned)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.problemId}, #{item.studentId}, DEFAULT)
+        </foreach>
+    </insert>
+    <insert id="batchBindProblemToStudents">
+        INSERT IGNORE INTO problem_student
+        (problem_id, student_id, learned)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.problemId}, #{item.studentId}, DEFAULT)
+        </foreach>
+    </insert>
 
 </mapper>

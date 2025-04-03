@@ -17,6 +17,7 @@ import java.util.List;
 public interface UserMapper extends BaseMapper<User> {
     IPage<User> selectUserPage(Page<User> page,String keyword);
 
-    void batchInsertUsers(List<User> users);
 
+
+    void batchInsertUsers(List<User> users);
 }

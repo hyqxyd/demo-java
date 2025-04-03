@@ -1,12 +1,19 @@
 package cn.fighter3.controller;
 
 import cn.fighter3.dto.QueryDTO;
+import cn.fighter3.dto.QueryIdDTO;
 import cn.fighter3.entity.Course;
+import cn.fighter3.entity.Problem;
 import cn.fighter3.entity.Topic;
+import cn.fighter3.entity.User;
 import cn.fighter3.result.Result;
 import cn.fighter3.service.CourseService;
+import cn.fighter3.service.ExcelService;
+import cn.fighter3.service.ProblemService;
+import cn.fighter3.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -15,6 +22,26 @@ import java.util.List;
 public class CourseController {
     @Autowired
     private CourseService courseService;
+    @Autowired
+    private ExcelService excelService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private ProblemService problemService;
+    @PostMapping("/import-students")
+    public Result importStudentsToCourse(@RequestParam("file") MultipartFile file, @RequestParam("courseId") Integer courseId){
+        try {
+            List<User> users = excelService.importUsersFromExcel(file);
+            // 这里可以添加批量插入数据库的逻辑
+            users=userService.batchAddUsers(users);
+            courseService.batchAddCourseStudent(courseId, users);
+            return new Result(200, "导入成功", users.size());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Result(500, "导入失败", null);
+        }
+    }
+
 
     @PostMapping("/list")
     public Result courseList(@RequestBody QueryDTO queryDTO){
@@ -25,10 +52,23 @@ public class CourseController {
         System.out.println(new Result(200,"",courseService.selectCoursePage(queryDTO)).getData()+"输出");
         return new Result(200,"",courseService.selectCoursePage(queryDTO));
     }
+    @PostMapping("/byteacherid")
+    public Result getCourseById(@RequestBody QueryIdDTO queryIdDTO){
+        return new Result(200,"",courseService.selectByIdCoursePage(queryIdDTO));
+    }
+
+
 
     @PostMapping("/add")
     public Result addCourse(@RequestBody Course course){
-        return new Result(200,"",courseService.addCourse(course));
+        course=courseService.addCourse(course);
+
+         System.out.println(course.getCourseId());
+         courseService.addTeacherCourse(course);
+
+
+
+        return new Result(200,"","添加成功");
     }
 
     @PostMapping("/update")
@@ -38,14 +78,18 @@ public class CourseController {
 
     @PostMapping("/delete")
     public Result deleteCourse(@RequestParam Integer id){
+        courseService.deleteTeacherCourse(id);//删除教师课程关联
         return new Result(200,"",courseService.deleteCourse(id));
     }
 
     @PostMapping("/delete/batch")
     public Result batchDeleteCourse(@RequestBody List<Integer> ids){
+
+       courseService.batchDeleteTeacherCourse(ids);//删除教师课程关联
         courseService.batchDeleteCourse(ids);
-        return new Result(200,"","");
+        return new Result(200,"","删除成功");
     }
+
     @GetMapping("/byteacher")
     public Result getCoursesByTeacherId(@RequestParam("teacherId") Integer teacherId) {
 
@@ -81,6 +125,29 @@ public class CourseController {
     public Result deleteTopic(@PathVariable("id") Integer id) {
         return new Result(200, "", courseService.deleteTopic(id));
     }
+    @GetMapping("/problems")
+    public Result getProblemsByTopicId(@RequestParam("topicId")  Integer topicId) {
+        System.out.println(topicId);
+        System.out.println(problemService.getProblemsByTopicId(topicId));
+        return new Result(200,"",problemService.getProblemsByTopicId(topicId));
+    }
+    @PostMapping("/problem/add")
+    public Result addProblem(@RequestBody Problem problem) {
+        return new Result(200, "", problemService.addProblem(problem));
+    }
+
+    @PostMapping("/problem/update")
+    public Result updateProblem(@RequestBody Problem problem) {
+        return new Result(200, "",problemService.updateProblem(problem));
+    }
+
+    @PostMapping("/problem/delete/{id}")
+    public Result deleteProblem(@PathVariable("id") Integer id) {
+        return new Result(200, "", problemService.deleteProblem(id));
+    }
+
+
+
 
 
 }

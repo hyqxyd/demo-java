@@ -28,7 +28,7 @@ public interface UserService {
 
     void batchDelete(List<Integer> ids);
 
-    void batchAddUsers(List<User> users);
+    List<User> batchAddUsers(List<User> users);
 
 
 }
