@@ -30,5 +30,4 @@ public interface UserService {
 
     List<User> batchAddUsers(List<User> users);
 
-
 }

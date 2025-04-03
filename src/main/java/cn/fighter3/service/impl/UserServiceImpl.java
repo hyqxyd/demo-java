@@ -6,7 +6,6 @@ import cn.fighter3.mapper.UserMapper;
 import cn.fighter3.service.UserService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +18,7 @@ import java.util.List;
  * @Description
  */
 @Service
-public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
+public class UserServiceImpl implements UserService {
     @Autowired
     private UserMapper userMapper;
 
@@ -28,6 +27,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Page<User> page=new Page<>(queryDTO.getPageNo(),queryDTO.getPageSize());
         return userMapper.selectUserPage(page,queryDTO.getKeyword());
     }
+
     @Override
     public Integer addUser(User user) {
         return userMapper.insert(user);

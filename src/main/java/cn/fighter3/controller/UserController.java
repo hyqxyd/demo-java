@@ -36,6 +36,7 @@ public class UserController {
     public Result userList(@RequestBody QueryDTO queryDTO){
         return new Result(200,"",userService.selectUserPage(queryDTO));
     }
+
     /**
      * 添加
      * @param user
@@ -94,5 +95,8 @@ public class UserController {
             return new Result(500, "导入失败", null);
         }
     }
+
+
+
 
 }
