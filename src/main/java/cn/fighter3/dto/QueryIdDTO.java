@@ -25,7 +25,7 @@ public class QueryIdDTO {
         return teacherId;
     }
 
-    public void setKeyword(String keyword) {
+    public void setKeyword(int keyword) {
         this.teacherId = teacherId;
     }
 }

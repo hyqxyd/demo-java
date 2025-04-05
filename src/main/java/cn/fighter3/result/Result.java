@@ -21,6 +21,15 @@ public class Result implements Serializable {
         this.message = message;
         this.data = data;
     }
+    // 成功静态方法
+    public static Result success(Object data) {
+        return new Result(200, "成功", data);
+    }
+
+    // 错误静态方法
+    public static Result error(Integer code, String message) {
+        return new Result(code, message, null);
+    }
 
     public Integer getCode() {
         return code;
