@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.fighter3.mapper.StudentAnswerMapper">
+
+    <select id="selectAnswerWithDetails" resultType="cn.fighter3.vo.StudentAnswerVO">
+        SELECT
+        sa.id,
+        sa.student_id,
+        sa.problem_id,
+        sa.content AS answer_content,
+        sa.status,
+        sa.teacher_feedback,
+        sa.score,
+        sa.updated_time,
+
+        p.problem AS problem_content,
+        t.topic_name AS topic_name,
+        c.course_name AS course_name
+        FROM student_answer sa
+        JOIN problem p ON sa.problem_id = p.id
+        JOIN topics t ON p.topic_id = t.topic_id
+        JOIN courses c ON t.courses_id = c.course_id
+        WHERE sa.student_id = #{dto.studentId}
+        <if test="dto.status != null and dto.status != '全部'">
+            AND sa.status = #{dto.status}
+        </if>
+        ORDER BY sa.updated_time DESC
+    </select>
+
+    <select id="selectDetailById" resultType="cn.fighter3.dto.StudentAnswerDetailDTO">
+        SELECT sa.id,
+               sa.content AS answerContent,
+               sa.status,
+               sa.teacher_feedback AS teacherFeedback,
+               sa.score,
+               p.problem AS problemContent,
+               t.topic_name AS topicName,
+               c.course_name AS courseName
+        FROM student_answer sa
+                 LEFT JOIN problem p ON sa.problem_id = p.id
+                 LEFT JOIN topics t ON p.topic_id = t.topic_id
+                 LEFT JOIN courses c ON t.courses_id = c.course_id
+        WHERE sa.id = #{id}
+    </select>
+
+</mapper>

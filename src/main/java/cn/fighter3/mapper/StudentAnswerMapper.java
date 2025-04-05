@@ -1,8 +1,13 @@
 package cn.fighter3.mapper;
 
+import cn.fighter3.dto.StudentAnswerDetailDTO;
+import cn.fighter3.dto.StudentAnswerQueryDTO;
 import cn.fighter3.entity.ProblemStudent;
 import cn.fighter3.entity.StudentAnswer;
+import cn.fighter3.vo.StudentAnswerVO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
@@ -49,4 +54,7 @@ public interface StudentAnswerMapper extends BaseMapper<StudentAnswer> {
     // StudentAnswerMapper.java
     @Delete("DELETE FROM student_answer WHERE problem_id = #{problemId}")
     int deleteByProblemId(@Param("problemId") Integer problemId);
+
+    IPage<StudentAnswerVO> selectAnswerWithDetails(Page<StudentAnswerVO> page, @Param("dto") StudentAnswerQueryDTO dto);
+    StudentAnswerDetailDTO selectDetailById(@Param("id") Integer id);
 }
