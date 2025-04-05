@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import java.util.List;
 
 /**
@@ -53,5 +53,20 @@ public class UserServiceImpl implements UserService {
     public  List<User> batchAddUsers(List<User> users) {
          userMapper.batchInsertUsers(users);
         return users;
+    }
+
+    @Override
+    public User findByAccount(String account) {
+          //通过登录名查询用户
+        QueryWrapper<User> wrapper = new QueryWrapper();
+        wrapper.eq("BINARY account", account);
+
+
+
+        User user = userMapper.selectOne(wrapper);
+
+        return user;
+
+
     }
 }

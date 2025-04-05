@@ -8,16 +8,16 @@ package cn.fighter3.dto;
 
 public class LoginDTO {
 
-    private String id;
+    private String account;
     private String password;
     private String role;
 
-   public String getId() {
-       return id;
-   }
 
-    public void setId(String Id) {
-        this.id = Id;
+    public String getAccount() {
+        return account;
+    }
+    public void setAccount(String account) {
+        this.account = account;
     }
 
     public String getPassword() {

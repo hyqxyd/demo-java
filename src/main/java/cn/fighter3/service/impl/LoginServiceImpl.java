@@ -27,10 +27,10 @@ public class LoginServiceImpl implements LoginService {
     @Override
     public Result login(LoginDTO loginDTO) {
 
-        System.out.println("loginDTO:"+loginDTO.getId());
+        System.out.println("loginDTO:"+loginDTO.getAccount());
         //校验参数
-        System.out.println(loginDTO.getId()+loginDTO.getPassword());
-        if (StringUtils.isEmpty(loginDTO.getId())){
+        System.out.println(loginDTO.getAccount()+loginDTO.getPassword());
+        if (StringUtils.isEmpty(loginDTO.getAccount())){
             return new Result(400,"账号不能为空","");
         }
         if (StringUtils.isEmpty(loginDTO.getPassword())){
@@ -38,13 +38,13 @@ public class LoginServiceImpl implements LoginService {
         }
         //通过登录名查询用户
         QueryWrapper<User> wrapper = new QueryWrapper();
-        wrapper.eq("BINARY id", loginDTO.getId());
+        wrapper.eq("BINARY account", loginDTO.getAccount());
 
 
 
         User user = userMapper.selectOne(wrapper);
         if (user == null) {
-            return new Result(401, "用户id不存在", "");
+            return new Result(401, "用户账号不存在", "");
         }
         //System.out.println(uer.toString());
         //比较密码

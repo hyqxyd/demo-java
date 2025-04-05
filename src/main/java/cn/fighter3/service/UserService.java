@@ -29,5 +29,5 @@ public interface UserService {
     void batchDelete(List<Integer> ids);
 
     List<User> batchAddUsers(List<User> users);
-
+    User findByAccount(String account);
 }

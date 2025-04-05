@@ -20,4 +20,8 @@ public interface UserMapper extends BaseMapper<User> {
 
 
     void batchInsertUsers(List<User> users);
+
+    
+
+
 }

@@ -21,7 +21,7 @@ public class LoginController {
 
     @PostMapping(value = "/api/login")
     public Result login(@RequestBody LoginDTO loginDTO){
-      System.out.println(loginDTO.getId());
+      System.out.println(loginDTO.getAccount());
 
 
         return loginService.login(loginDTO);

@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -32,8 +33,29 @@ public class CourseController {
     public Result importStudentsToCourse(@RequestParam("file") MultipartFile file, @RequestParam("courseId") Integer courseId){
         try {
             List<User> users = excelService.importUsersFromExcel(file);
-            // 这里可以添加批量插入数据库的逻辑
-            users=userService.batchAddUsers(users);
+           // 将users分成两组：已存在的和新用户
+            List<User> existingUsers = new ArrayList<>();
+            List<User> newUsers = new ArrayList<>();
+              for (User user : users) {
+                User existingUser = userService.findByAccount(user.getAccount());
+                if (existingUser != null) {
+                    // 如果用户已存在，使用已存在用户的ID
+                    user.setId(existingUser.getId());
+                    existingUsers.add(user);
+                } else {
+                    newUsers.add(user);
+                }
+            }
+             // 批量插入新用户
+            if (!newUsers.isEmpty()) {
+                userService.batchAddUsers(newUsers);
+            }
+             // 合并所有用户列表
+            users.clear();
+            users.addAll(existingUsers);
+            users.addAll(newUsers);
+            
+            System.out.println(users.toString());
             courseService.batchAddCourseStudent(courseId, users);
             return new Result(200, "导入成功", users.size());
         } catch (Exception e) {

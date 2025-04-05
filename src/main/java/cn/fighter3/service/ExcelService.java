@@ -23,9 +23,7 @@ public class ExcelService {
                 User user = new User();
 
                 Cell cell = row.getCell(0);
-                double doubleValue = Double.parseDouble(cell.toString());  // 先转Double
-                int value = (int) doubleValue;  // 显式类型转换（注意精度丢失）
-                user.setId(value);
+                user.setAccount(getCellValueAsString(cell));
                 cell=row.getCell(1);
                 user.setUserName(getCellValueAsString(cell));
 
