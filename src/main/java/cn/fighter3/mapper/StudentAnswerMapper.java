@@ -2,8 +2,10 @@ package cn.fighter3.mapper;
 
 import cn.fighter3.dto.StudentAnswerDetailDTO;
 import cn.fighter3.dto.StudentAnswerQueryDTO;
+import cn.fighter3.dto.TeacherAnswerQueryDTO;
 import cn.fighter3.entity.ProblemStudent;
 import cn.fighter3.entity.StudentAnswer;
+import cn.fighter3.vo.StudentAnswerReviewVO;
 import cn.fighter3.vo.StudentAnswerVO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -57,4 +59,5 @@ public interface StudentAnswerMapper extends BaseMapper<StudentAnswer> {
 
     IPage<StudentAnswerVO> selectAnswerWithDetails(Page<StudentAnswerVO> page, @Param("dto") StudentAnswerQueryDTO dto);
     StudentAnswerDetailDTO selectDetailById(@Param("id") Integer id);
+    IPage<StudentAnswerReviewVO> selectStudentAnswers(Page<StudentAnswerReviewVO> page, @Param("dto") TeacherAnswerQueryDTO dto);
 }

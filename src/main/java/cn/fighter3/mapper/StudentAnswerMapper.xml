@@ -46,4 +46,23 @@
         WHERE sa.id = #{id}
     </select>
 
+    <select id="selectStudentAnswers" resultType="cn.fighter3.vo.StudentAnswerReviewVO">
+        SELECT sa.id,
+        sa.student_id,
+        u.user_name AS student_name,
+        sa.content AS answerText,
+        sa.updated_time AS answerTime,
+        sa.teacher_feedback,
+        sa.status
+        FROM student_answer sa
+        JOIN user u ON sa.student_id = u.id
+        JOIN problem q ON sa.problem_id = q.id
+        JOIN topics t ON q.topic_id = t.topic_id
+        JOIN courses c ON t.courses_id = c.course_id
+        WHERE c.teacher_id = #{dto.teacherId}
+        <if test="dto.courseId != null"> AND c.course_id = #{dto.courseId} </if>
+        <if test="dto.topicId != null"> AND t.topic_id = #{dto.topicId} </if>
+        <if test="dto.questionId != null"> AND q.id = #{dto.questionId} </if>
+    </select>
+
 </mapper>
