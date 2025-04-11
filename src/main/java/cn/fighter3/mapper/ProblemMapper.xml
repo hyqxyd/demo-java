@@ -25,4 +25,18 @@
         </if>
     </insert>
 
+    <insert id="batchBindProblemToStudents">
+        INSERT IGNORE INTO problem_student
+        (problem_id, student_id, learned)
+        VALUES
+        <if test="list != null and list.size() > 0">
+            <foreach collection="list" item="item" separator=",">
+                (#{item.problemId}, #{item.studentId}, DEFAULT)
+            </foreach>
+        </if>
+        <if test="list == null or list.size() == 0">
+            (null, null, 0) <!-- 构造一个无效值，避免语法错误 -->
+        </if>
+    </insert>
+
 </mapper>

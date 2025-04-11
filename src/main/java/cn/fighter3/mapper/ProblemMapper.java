@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
+@Mapper
 public interface ProblemMapper extends BaseMapper<Problem> {
 
     @Select("SELECT p.id AS id,p.problem,p.topic_id AS topicId FROM problem p " +
@@ -20,7 +21,10 @@ public interface ProblemMapper extends BaseMapper<Problem> {
             "WHERE p.id = #{problemId}")
     Integer selectCourseIdByProblemId(int problemId);
 
-
+    @Select("SELECT p.id FROM problem p " +
+            "INNER JOIN topics t ON p.topic_id = t.topic_id " +
+            "WHERE t.courses_id = #{courseId}")
+    List<Integer> getProblemIdsByCourseId(@Param("courseId") Integer courseId);
 
 
     //根据topicid获取课程id
@@ -55,5 +59,26 @@ public interface ProblemMapper extends BaseMapper<Problem> {
 
     @Update("update problem_student set learned=1 where problem_id=#{problemId} and student_id=#{studentId}")
     void updateProblemStudent(@Param("problemId")Integer problemId , @Param("studentId")Integer studentId );
+
+        // 根据课程ID和学生ID删除问题关联
+        @Delete("DELETE FROM problem_student " +
+                "WHERE student_id = #{studentId} " +
+                "AND problem_id IN (" +
+                "  SELECT p.id FROM problem p " +
+                "  INNER JOIN topics t ON p.topic_id = t.topic_id " +
+                "  WHERE t.courses_id = #{courseId}" +
+                ")")
+        int deleteProblemStudentByCourse(@Param("studentId") Integer studentId,
+                                         @Param("courseId") Integer courseId);
+
+        // 批量删除问题关联（按学生-课程分组）
+        @Delete("<script>" +
+                "DELETE FROM problem_student " +
+                "WHERE (student_id, problem_id) IN " +
+                "<foreach item='item' collection='list' open='(' separator=',' close=')'>" +
+                "(#{item.studentId}, #{item.problemId})" +
+                "</foreach>" +
+                "</script>")
+        int batchDeleteProblemStudent(@Param("list") List<ProblemStudent> problemStudents);
 
 }
