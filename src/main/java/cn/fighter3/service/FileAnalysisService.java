@@ -86,7 +86,7 @@ public class FileAnalysisService {
                 .addFormDataPart("app_id","dc6d8359-b428-4afa-9387-cd0cdea8c9bf")
                 .addFormDataPart("file",filename,
                         RequestBody.create(MediaType.parse("application/octet-stream"),
-                                new File("C:/Users/14820/Downloads/springboot-vue-demo-master (3)/springboot-vue-demo-master/demo-java/src/main/resources/upload/"+service+"/"+filename)))
+                                new File("/opt/springboot/app/src/main/resources/upload/"+service+"/"+filename)))
                 .addFormDataPart("conversation_id",conversationId)
                 .build();
 
