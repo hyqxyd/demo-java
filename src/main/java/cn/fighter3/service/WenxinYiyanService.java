@@ -46,6 +46,7 @@ public class WenxinYiyanService {
         String sessionId = jsonObj.getString("sessionId");
         int courseId = jsonObj.getIntValue("courseId");
         int topicId = jsonObj.getIntValue("topicId");
+        int problemId = jsonObj.getIntValue("problemId");
 
         // 保存问题并获取ID
         int questionId = questionService.saveQuestion(userId, courseId, content);
@@ -138,7 +139,7 @@ public class WenxinYiyanService {
 
                 // 更新会话
                 if (session == null) {
-                    sessionService.saveSession(sessionId, questionId, answerId, modeId, topicId, userId, messageArray.toJSONString());
+                    sessionService.saveSession(sessionId, questionId, answerId, modeId, topicId, userId, messageArray.toJSONString(),problemId);
                 } else {
                     session.setContent(messageArray.toJSONString());
                     sessionMapper.updateById(session);

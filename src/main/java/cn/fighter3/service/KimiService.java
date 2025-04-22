@@ -42,6 +42,7 @@ public class KimiService {
         String sessionId = jsonObj.getString("sessionId");
         int courseId = jsonObj.getIntValue("courseId");
         int topicId = jsonObj.getIntValue("topicId");
+        int problemId = jsonObj.getIntValue("problemId");
 
         // 保存问题
         int questionId = questionService.saveQuestion(userId, courseId, content);
@@ -147,7 +148,7 @@ public class KimiService {
                 messageArray.add(assistantMessage);
 
                 if (session == null) {
-                    sessionService.saveSession(sessionId, questionId, answerId, modeId, topicId, userId, messageArray.toJSONString());
+                    sessionService.saveSession(sessionId, questionId, answerId, modeId, topicId, userId, messageArray.toJSONString(),problemId);
                 } else {
                     session.setContent(messageArray.toJSONString());
                     sessionMapper.updateById(session);

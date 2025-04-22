@@ -39,7 +39,7 @@ public class FileAnalysisService {
 
 
     @Transactional
-    public void analyzeAndSave(String service,String filename,int modeId, int userId,String sessionId,int courseId,int topicId,String query) throws IOException {
+    public void analyzeAndSave(String service,String filename,int modeId, int userId,String sessionId,int courseId,int topicId,int problemId,String query) throws IOException {
         this.modeId = modeId;
         // 保存问题记录
         int questionId = questionService.saveQuestion(userId, courseId, query);
@@ -58,7 +58,7 @@ public class FileAnalysisService {
         int answerId = answerService.saveAnswer(questionId, analysisResult, modeId);
 
         // 更新会话记录
-        updateSession(sessionId, userId, topicId, questionId, answerId, query, analysisResult);
+        updateSession(sessionId, userId, topicId, questionId, answerId, problemId,query, analysisResult);
     }
 
     static final OkHttpClient HTTP_CLIENT = new OkHttpClient().newBuilder().build();
@@ -86,7 +86,7 @@ public class FileAnalysisService {
                 .addFormDataPart("app_id","dc6d8359-b428-4afa-9387-cd0cdea8c9bf")
                 .addFormDataPart("file",filename,
                         RequestBody.create(MediaType.parse("application/octet-stream"),
-                                new File("/opt/springboot/app/src/main/resources/upload/"+service+"/"+filename)))
+                                new File("C:/Users/14820/Downloads/springboot-vue-demo-master (3)/springboot-vue-demo-master/demo-java/src/main/resources/upload/"+service+"/"+filename)))
                 .addFormDataPart("conversation_id",conversationId)
                 .build();
 
@@ -172,7 +172,7 @@ public class FileAnalysisService {
 
 
         private void updateSession(String sessionId, int userId, int topicId,
-                               int questionId, int answerId, String query, String analysisResult) {
+                               int questionId, int answerId,int problemId, String query, String analysisResult) {
         Session session = sessionMapper.selectOne(
                 new QueryWrapper<Session>()
                         .eq("id", sessionId)
@@ -196,7 +196,7 @@ public class FileAnalysisService {
 
         // 保存或更新会话
         if (session == null) {
-            sessionService.saveSession(sessionId, questionId, answerId, modeId, topicId, userId, messages.toJSONString());
+            sessionService.saveSession(sessionId, questionId, answerId, modeId, topicId, userId, messages.toJSONString(),problemId);
         } else {
             session.setContent(messages.toJSONString());
             sessionMapper.updateById(session);

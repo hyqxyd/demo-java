@@ -16,7 +16,7 @@ import java.util.List;
 public class SessionService {
     @Autowired
     private SessionMapper sessionMapper;
-    public void saveSession(String id,int qId,int aId,int mId,int tId,int userId,String content) {
+    public void saveSession(String id,int qId,int aId,int mId,int tId,int userId,String content,int pid) {
         Session session=new Session();
         session.setId(id);
         session.setQId(qId);
@@ -26,6 +26,7 @@ public class SessionService {
         session.setUserId(userId);
         session.setContent(content);
         session.setSessionTime();
+        session.setPId(pid);
         sessionMapper.insert(session);
 
     }
@@ -54,4 +55,10 @@ public class SessionService {
     public Session getSessionById(String id) {
         return sessionMapper.selectById(id);
     }
+    public  List<Session> getSessionBystudentIdtopicIdAndproblemId(int studentId , int topicId ,int problemId) {
+        return sessionMapper.selectBystudentIdtopicIdproblemId(studentId,topicId,problemId);
+    }
+
+
+
 }

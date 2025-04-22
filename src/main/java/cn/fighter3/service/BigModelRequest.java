@@ -31,6 +31,7 @@ public class BigModelRequest extends WebSocketListener {
     private final int userId;
     private final int questionId;
     private final int topicId;
+    private final int problemId;
     private final String originalMessages;
     private final Session existingSession;
 
@@ -47,6 +48,7 @@ public class BigModelRequest extends WebSocketListener {
                            int userId,
                            int questionId,
                            int topicId,
+                           int problemId,
                            String originalMessages,
                            Session existingSession) {
         this.answerService = answerService;
@@ -59,6 +61,7 @@ public class BigModelRequest extends WebSocketListener {
         this.userId = userId;
         this.questionId = questionId;
         this.topicId = topicId;
+        this.problemId = problemId;
         this.originalMessages = originalMessages;
         this.existingSession = existingSession;
     }
@@ -179,7 +182,7 @@ public class BigModelRequest extends WebSocketListener {
 
         if (existingSession == null) {
             sessionService.saveSession(sessionId, questionId, answerId, modeId, topicId, userId,
-                    messageArray.toJSONString());
+                    messageArray.toJSONString(),problemId);
         } else {
             UpdateWrapper<Session> updateWrapper = new UpdateWrapper<>();
             updateWrapper.eq("id", sessionId).eq("user_id", userId);

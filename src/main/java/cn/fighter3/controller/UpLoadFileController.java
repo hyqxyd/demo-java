@@ -54,6 +54,7 @@ public class UpLoadFileController {
             @RequestParam String sessionId,
             @RequestParam(required = false) Integer courseId,
             @RequestParam(required = false) Integer topicId,
+            @RequestParam(required = false) Integer problemId,
             @RequestParam String query
            ) {
 
@@ -83,7 +84,7 @@ public class UpLoadFileController {
         try {
             // 保存文件
             file.transferTo(destFile);
-            fileAnalysisService.analyzeAndSave(service,fileName,m_id,userId,sessionId,courseId,topicId,query);
+            fileAnalysisService.analyzeAndSave(service,fileName,m_id,userId,sessionId,courseId,topicId,problemId,query);
 
             return new Result(200, "请求成功", "文件上传成功: " + fileName);
         } catch (IOException e) {

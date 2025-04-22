@@ -20,6 +20,14 @@ public class Session {
     private String content;
     private int userId;
     private Date SessionTime;
+    private  int pId;
+
+    public int getPId() {
+        return pId;
+    }
+    public void setPId(int pId) {
+        this.pId = pId;
+    }
 
 
     public int getUserId() {

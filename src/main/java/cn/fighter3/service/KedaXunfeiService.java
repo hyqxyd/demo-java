@@ -36,6 +36,7 @@ public class KedaXunfeiService {
         String sessionId = jsonObj.getString("sessionId");
         int courseId = jsonObj.getIntValue("courseId");
         int topicId = jsonObj.getIntValue("topicId");
+        int problemId = jsonObj.getIntValue("problemId");
 
         // 保存问题并获取ID
         int questionId = questionService.saveQuestion(userId, courseId, content);
@@ -66,6 +67,7 @@ public class KedaXunfeiService {
                 userId,
                 questionId,
                 topicId,
+                problemId,
                 messageArray.toJSONString(),
                 session
         );

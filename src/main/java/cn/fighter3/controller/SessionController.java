@@ -1,5 +1,6 @@
 package cn.fighter3.controller;
 
+import cn.fighter3.dto.HistoryDialogueRequest;
 import cn.fighter3.dto.HistorySessionDTO;
 import cn.fighter3.entity.Session;
 import cn.fighter3.mapper.SessionMapper;
@@ -85,4 +86,20 @@ public class SessionController {
         Session session = sessionService.getSessionById( sessionId);
         return new Result(200, "Success", session);
     }
+  @PostMapping("/getSessions")
+  public Result getSession(@RequestBody HistoryDialogueRequest request) {
+
+
+      List<Session> session = sessionService.getSessionBystudentIdtopicIdAndproblemId(request.getStudentId(),request.getTopicId(),request.getProblemId());
+
+      
+
+      return new Result(200, "Success", session);
+  }
+
+
+
+
+
+
 }
