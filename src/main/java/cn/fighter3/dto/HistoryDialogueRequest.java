@@ -17,7 +17,8 @@ public class HistoryDialogueRequest {
     public int getCourseId() {
         return courseId;
     }
-    
+
+
 
     public void setStudentId(int studentId) {
         this.studentId = studentId;
