@@ -13,6 +13,8 @@
         </foreach>
     </insert>
 
+
+
     <insert id="batchBindProblemToStudents">
         INSERT IGNORE INTO problem_student
         (problem_id, student_id, learned)
