@@ -169,6 +169,65 @@ public class WenxinYiyanService {
         }
     }
 
+    /**
+     * 获取问题的答案（同步方法，用于RAG服务）
+     */
+    public String getAnswer(String prompt, int userId, String sessionId) throws IOException {
+        // 获取access_token
+        String accessToken;
+        try {
+            accessToken = getAccessToken();
+        } catch (Exception e) {
+            throw new IOException("获取访问令牌失败: " + e.getMessage(), e);
+        }
+
+        // 构造消息数组
+        JSONArray messageArray = new JSONArray();
+        JSONObject userMessage = new JSONObject();
+        userMessage.put("role", "user");
+        userMessage.put("content", prompt);
+        messageArray.add(userMessage);
+
+        // 构造API请求
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("messages", messageArray);
+        requestBody.put("stream", false); // 非流式响应
+
+        RequestBody okHttpBody = RequestBody.create(
+                requestBody.toJSONString(),
+                MediaType.parse("application/json; charset=utf-8")
+        );
+
+        Request request = new Request.Builder()
+                .url(API_URL + "?access_token=" + accessToken)
+                .post(okHttpBody)
+                .addHeader("Content-Type", "application/json")
+                .build();
+
+        // 执行请求并获取响应
+        try (Response response = okHttpClient.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new IOException("API请求失败: " + response.code() + " " + response.message());
+            }
+
+            ResponseBody body = response.body();
+            if (body == null) {
+                throw new IOException("响应体为空");
+            }
+
+            String responseStr = body.string();
+            JSONObject responseJson = JSON.parseObject(responseStr);
+            
+            // 检查是否有错误
+            if (responseJson.containsKey("error_code")) {
+                throw new IOException("API返回错误: " + responseJson.getString("error_msg"));
+            }
+
+            // 提取结果
+            return responseJson.getString("result");
+        }
+    }
+
     private String escapeContent(String content) {
         return content.replace("\\", "\\\\")
                 .replace("\"", "\\\"")

@@ -57,10 +57,11 @@ public class StudentAnswerService {
     }
 
     public int countUnfinishedProblems(Integer studentId) {
-        return studentAnswerMapper.selectCount(
+        Long count = studentAnswerMapper.selectCount(
                 new QueryWrapper<StudentAnswer>()
                         .eq("student_id", studentId)
                         .eq("status", "待提交") // 根据实际状态字段名调整
         );
+        return count != null ? count.intValue() : 0;
     }
 }
